@@ -5,114 +5,83 @@
  * @format
  */
 
-import React from 'react';
-import type {PropsWithChildren} from 'react';
-import {
-  SafeAreaView,
-  ScrollView,
-  StatusBar,
-  StyleSheet,
-  Text,
-  useColorScheme,
-  View,
-} from 'react-native';
+import {NavigationContainer} from '@react-navigation/native';
+import React, {useEffect} from 'react';
+import {Platform} from 'react-native';
+import {GestureHandlerRootView} from 'react-native-gesture-handler';
+import {PERMISSIONS, requestMultiple, RESULTS} from 'react-native-permissions';
+import Stacks from './src/navigations/Stacks';
+import {loadStepLevel} from './src/utils/storage/storage';
 
-import {
-  Colors,
-  DebugInstructions,
-  Header,
-  LearnMoreLinks,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
+async function requestPermissions() {
+  if (Platform.OS === 'ios') {
+    // iOS에서 요청할 권한 목록을 배열에 추가
+    const permissions = [
+      PERMISSIONS.IOS.BLUETOOTH,
+      PERMISSIONS.IOS.LOCATION_WHEN_IN_USE,
+    ];
 
-type SectionProps = PropsWithChildren<{
-  title: string;
-}>;
+    // requestMultiple을 사용하여 권한 요청
+    const statuses = await requestMultiple(permissions);
 
-function Section({children, title}: SectionProps): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
-  return (
-    <View style={styles.sectionContainer}>
-      <Text
-        style={[
-          styles.sectionTitle,
-          {
-            color: isDarkMode ? Colors.white : Colors.black,
-          },
-        ]}>
-        {title}
-      </Text>
-      <Text
-        style={[
-          styles.sectionDescription,
-          {
-            color: isDarkMode ? Colors.light : Colors.dark,
-          },
-        ]}>
-        {children}
-      </Text>
-    </View>
-  );
+    // 각 권한의 요청 결과를 확인
+    if (
+      statuses[PERMISSIONS.IOS.BLUETOOTH] === RESULTS.GRANTED &&
+      statuses[PERMISSIONS.IOS.LOCATION_WHEN_IN_USE] === RESULTS.GRANTED
+    ) {
+      console.log('iOS BLE 및 위치 권한 허용됨');
+    } else {
+      console.log('iOS 권한 거부됨');
+    }
+  } else if (Platform.OS === 'android') {
+    // Android에서 요청할 권한 목록을 배열에 추가
+    const permissions = [
+      PERMISSIONS.ANDROID.BLUETOOTH_SCAN,
+      PERMISSIONS.ANDROID.BLUETOOTH_CONNECT,
+      PERMISSIONS.ANDROID.ACCESS_FINE_LOCATION,
+    ];
+
+    // requestMultiple을 사용하여 권한 요청
+    const statuses = await requestMultiple(permissions);
+
+    // 각 권한의 요청 결과를 확인
+    if (
+      statuses[PERMISSIONS.ANDROID.BLUETOOTH_SCAN] === RESULTS.GRANTED &&
+      statuses[PERMISSIONS.ANDROID.BLUETOOTH_CONNECT] === RESULTS.GRANTED &&
+      statuses[PERMISSIONS.ANDROID.ACCESS_FINE_LOCATION] === RESULTS.GRANTED
+    ) {
+      console.log('Android BLE 및 위치 권한 허용됨');
+    } else {
+      console.log('Android 권한 거부됨');
+    }
+  }
+}
+
+// 저장된 단계값 불러오기 함수
+function logStepLevels() {
+  const parts = ['shoulder', 'neck', 'head', 'rightHead', 'leftHead', 'smell'];
+  parts.forEach(part => {
+    const level = loadStepLevel(part);
+    return console.log(`${part}: ${level}`);
+  });
 }
 
 function App(): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
+  // Logic
 
-  const backgroundStyle = {
-    backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
-  };
+  useEffect(() => {
+    requestPermissions();
+    logStepLevels();
+  }, []);
 
+  // View
   return (
-    <SafeAreaView style={backgroundStyle}>
-      <StatusBar
-        barStyle={isDarkMode ? 'light-content' : 'dark-content'}
-        backgroundColor={backgroundStyle.backgroundColor}
-      />
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        style={backgroundStyle}>
-        <Header />
-        <View
-          style={{
-            backgroundColor: isDarkMode ? Colors.black : Colors.white,
-          }}>
-          <Section title="Step One">
-            Edit <Text style={styles.highlight}>App.tsx</Text> to change this
-            screen and then come back to see your edits.
-          </Section>
-          <Section title="See Your Changes">
-            <ReloadInstructions />
-          </Section>
-          <Section title="Debug">
-            <DebugInstructions />
-          </Section>
-          <Section title="Learn More">
-            Read the docs to discover what to do next:
-          </Section>
-          <LearnMoreLinks />
-        </View>
-      </ScrollView>
-    </SafeAreaView>
+    <GestureHandlerRootView style={{flex: 1}}>
+      <NavigationContainer>
+        <Stacks />
+      </NavigationContainer>
+    </GestureHandlerRootView>
   );
 }
-
-const styles = StyleSheet.create({
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
-  },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
-  },
-  sectionDescription: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: '400',
-  },
-  highlight: {
-    fontWeight: '700',
-  },
-});
 
 export default App;

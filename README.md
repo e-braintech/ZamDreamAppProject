@@ -1,79 +1,75 @@
-This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
+# 잠드림
 
-# Getting Started
+어플리케이션과 스마트 에어 베개 간 Bluetooth 기능을 통해 통신하는 BLE 프로젝트 입니다.
 
->**Note**: Make sure you have completed the [React Native - Environment Setup](https://reactnative.dev/docs/environment-setup) instructions till "Creating a new application" step, before proceeding.
+# 목차
 
-## Step 1: Start the Metro Server
+- [프로젝트 구성도](#프로젝트-구성도)
+- [프로젝트 기술](#프로젝트-기술)
+- [프로젝트 실행 방법](#프로젝트-실행-방법)
 
-First, you will need to start **Metro**, the JavaScript _bundler_ that ships _with_ React Native.
+## 프로젝트 구성도
 
-To start Metro, run the following command from the _root_ of your React Native project:
+![프로젝트 구성도](https://github.com/user-attachments/assets/ac2c129a-8440-439a-b010-ad73059ac5d6)
 
-```bash
-# using npm
-npm start
+## 프로젝트 기술
 
-# OR using Yarn
-yarn start
-```
+- React Native CLI
+- TypeScript
+- [React Navigation](https://reactnavigation.org/)
+  - [Stack](https://reactnavigation.org/docs/stack-navigator/)
+  - [Bottom-Tab](https://reactnavigation.org/docs/bottom-tab-navigator/)
+- BLE
+  - [react-native-ble-plx](https://github.com/dotintent/react-native-ble-plx)
+  - [react-native-ble-manager](https://github.com/innoveit/react-native-ble-manager)
+- [Zustand](https://zustand-demo.pmnd.rs/)
+- [react-native-mmkv](https://github.com/mrousavy/react-native-mmkv)
+- [react-native-permissions](https://github.com/zoontek/react-native-permissions)
 
-## Step 2: Start your Application
+## 프로젝트 실행 방법
 
-Let Metro Bundler run in its _own_ terminal. Open a _new_ terminal from the _root_ of your React Native project. Run the following command to start your _Android_ or _iOS_ app:
+### 공통
 
-### For Android
+메트로(Metro) 서버를 실행합니다.
 
-```bash
-# using npm
-npm run android
+> npm start
 
-# OR using Yarn
-yarn android
-```
+### 1. 앱 빌드 하는 방법(Simulator, Amulator 에서 빌드했을 때)
 
-### For iOS
+#### Android
 
-```bash
-# using npm
-npm run ios
+Android 앱 빌드를 시행합니다.
 
-# OR using Yarn
-yarn ios
-```
+> npm run android
 
-If everything is set up _correctly_, you should see your new app running in your _Android Emulator_ or _iOS Simulator_ shortly provided you have set up your emulator/simulator correctly.
+#### iOS
 
-This is one way to run your app — you can also run it directly from within Android Studio and Xcode respectively.
+iOS 앱 빌드를 시행합니다.
 
-## Step 3: Modifying your App
+> npm run ios
 
-Now that you have successfully run the app, let's modify it.
+### 2. 앱 빌드 하는 방법(실기기에서 빌드했을 때)
 
-1. Open `App.tsx` in your text editor of choice and edit some lines.
-2. For **Android**: Press the <kbd>R</kbd> key twice or select **"Reload"** from the **Developer Menu** (<kbd>Ctrl</kbd> + <kbd>M</kbd> (on Window and Linux) or <kbd>Cmd ⌘</kbd> + <kbd>M</kbd> (on macOS)) to see your changes!
+#### Android
 
-   For **iOS**: Hit <kbd>Cmd ⌘</kbd> + <kbd>R</kbd> in your iOS Simulator to reload the app and see your changes!
+1. 맥북과 안드로이드 기기를 연결합니다.
+2. 터미널에서 기기 리스트를 출력하는 명령어를 입력합니다.
 
-## Congratulations! :tada:
+   > adb devices
 
-You've successfully run and modified your React Native App. :partying_face:
+3. 출력된 기기 리스트에서 연결한 안드로이드 기기가 발견된다면 기기 연결 시행하는 명령어를 입력합니다.
 
-### Now what?
+   > adb reverse tcp:8081 tcp:8081
 
-- If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
-- If you're curious to learn more about React Native, check out the [Introduction to React Native](https://reactnative.dev/docs/getting-started).
+4. 다시 터미널에 Android 앱 빌드를 시행하는 명령어를 입력합니다.
 
-# Troubleshooting
+   > npm run android
 
-If you can't get this to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
+#### iOS
 
-# Learn More
+1. 맥북과 아이폰 기기를 연결합니다.
+2. Xcode 프로그램을 실행하여 연결된 아이폰을 선택합니다.
+3. Xcode 프로그램의 설정 창에 들어가서 개발자 계정을 등록합니다.
+4. 다시 터미널에 iOS 앱 빌드를 시행하는 명령어를 입력합니다.
 
-To learn more about React Native, take a look at the following resources:
-
-- [React Native Website](https://reactnative.dev) - learn more about React Native.
-- [Getting Started](https://reactnative.dev/docs/environment-setup) - an **overview** of React Native and how setup your environment.
-- [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
-- [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
-- [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
+   > npm run ios
