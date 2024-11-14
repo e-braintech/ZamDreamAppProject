@@ -8,7 +8,7 @@ const Stack = createStackNavigator<ROOT_NAVIGATION>();
 
 const Stacks = () => {
   return (
-    <Stack.Navigator initialRouteName="Intro">
+    <Stack.Navigator initialRouteName="ScanDevice">
       <Stack.Screen
         name="Intro"
         component={IntroScreen}

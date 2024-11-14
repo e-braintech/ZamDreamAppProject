@@ -26,8 +26,9 @@ import {
   shoulder_step_3,
   shoulder_step_4,
   shoulder_step_5,
-  smell_off,
-  smell_on,
+  smell_step_1,
+  smell_step_2,
+  smell_step_3,
 } from '../data/actions';
 import {characteristic_UUID, service_UUID} from '../data/uuids';
 import {BLEService} from '../services/BLEService';
@@ -50,16 +51,27 @@ const BluetoothBottomSheetControlView: React.FC<
     useStepStore();
 
   const [stepLevel, setStepLevel] = useState<number>(1); // 단계 수 상태 추가
-  const [isSmellOn, setIsSmellOn] = useState<boolean>(false); // 향기 상태를 관리하는 상태 변수
 
   // 단계 수 증가 함수
   const handleIncrease = () => {
-    setStepLevel(prev => (prev < 5 ? prev + 1 : prev));
+    setStepLevel(prev => {
+      if (stepNumber === 6) {
+        return prev < 3 ? prev + 1 : prev; // stepNumber가 6일 때 3까지만 증가
+      } else {
+        return prev < 5 ? prev + 1 : prev; // 다른 경우는 5까지만 증가
+      }
+    });
   };
 
   // 단계 수 감소 함수
   const handleDecrease = () => {
-    setStepLevel(prev => (prev > 1 ? prev - 1 : 1));
+    setStepLevel(prev => {
+      if (stepNumber === 6) {
+        return prev > 1 ? prev - 1 : 1; // stepNumber가 6일 때 1까지만 감소
+      } else {
+        return prev > 1 ? prev - 1 : 1; // 다른 경우는 1까지만 감소
+      }
+    });
   };
 
   // 단계별 Bluetooth 데이터 가져오기
@@ -119,7 +131,13 @@ const BluetoothBottomSheetControlView: React.FC<
           ? left_head_step_4
           : left_head_step_5;
       case 6:
-        return isSmellOn ? smell_on : smell_off;
+        return stepLevel === 1
+          ? smell_step_1
+          : stepLevel === 2
+          ? smell_step_2
+          : stepLevel === 3
+          ? smell_step_3
+          : null; // 잘못된 stepLevel에 대해 null 반환
       default:
         return null;
     }
@@ -138,6 +156,8 @@ const BluetoothBottomSheetControlView: React.FC<
         return 'rightHead';
       case 5:
         return 'leftHead';
+      case 6:
+        return 'smell';
       default:
         return '';
     }
@@ -187,14 +207,14 @@ const BluetoothBottomSheetControlView: React.FC<
     }
   };
 
-  // '켜기' 또는 '끄기' 버튼 클릭 시 데이터를 전송하는 함수
-  const handleSmellToggle = (on: boolean) => {
-    const data = on ? smell_on : smell_off;
-    setIsSmellOn(on); // 상태 업데이트
-    setStep('smell', on ? 1 : 0);
-    sendDataToDevice(data); // 데이터 전송
-    hideBottomSheet();
-  };
+  // // '켜기' 또는 '끄기' 버튼 클릭 시 데이터를 전송하는 함수
+  // const handleSmellToggle = (on: boolean) => {
+  //   const data = on ? smell_on : smell_off;
+  //   setIsSmellOn(on); // 상태 업데이트
+  //   setStep('smell', on ? 1 : 0);
+  //   sendDataToDevice(data); // 데이터 전송
+  //   hideBottomSheet();
+  // };
 
   // useEffect 훅으로 초기 상태 설정
   useEffect(() => {
@@ -215,7 +235,7 @@ const BluetoothBottomSheetControlView: React.FC<
         setStepLevel(loadStepLevel('leftHead'));
         break;
       case 6:
-        setIsSmellOn(loadStepLevel('smell') === 1);
+        setStepLevel(loadStepLevel('smell'));
         break;
       default:
         setStepLevel(1);
@@ -256,112 +276,70 @@ const BluetoothBottomSheetControlView: React.FC<
         }}>
         {title}
       </Text>
-
-      {stepNumber > 5 ? (
-        <>
-          <Text style={{fontSize: 16, textAlign: 'center', marginBottom: 25}}>
-            향기 조작
-          </Text>
-          <View
-            style={{
-              flexDirection: 'row',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-            }}>
-            <Pressable
-              style={{
-                flex: 1,
-                alignItems: 'center',
-                paddingVertical: 10,
-                borderWidth: 1,
-                borderRadius: 20,
-                marginRight: 10,
-              }}
-              onPress={() => handleSmellToggle(false)}>
-              <Text>끄기</Text>
-            </Pressable>
-            <Pressable
-              style={{
-                flex: 1,
-                alignItems: 'center',
-                paddingVertical: 10,
-                borderWidth: 1,
-                borderRadius: 20,
-                marginLeft: 10,
-              }}
-              onPress={() => handleSmellToggle(true)}>
-              <Text>켜기</Text>
-            </Pressable>
-          </View>
-        </>
-      ) : (
-        <>
-          <Text
-            style={{
-              fontSize: 16,
-              fontWeight: 'bold',
-              textAlign: 'center',
-              marginBottom: 25,
-            }}>{`${stepLevel}단`}</Text>
-          <View
-            style={{
-              flexDirection: 'row',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              marginBottom: 50,
-            }}>
-            <TouchableOpacity
-              style={{padding: 10, borderWidth: 1, borderRadius: 5}}
-              onPress={handleDecrease}>
-              <Image
-                source={require('../assets/up.png')}
-                style={{width: 24, height: 24}}
-                resizeMode="contain"
-              />
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={{padding: 10, borderWidth: 1, borderRadius: 5}}
-              onPress={handleIncrease}>
-              <Image
-                source={require('../assets/down.png')}
-                style={{width: 24, height: 24}}
-                resizeMode="contain"
-              />
-            </TouchableOpacity>
-          </View>
-          <View
-            style={{
-              flexDirection: 'row',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-            }}>
-            <Pressable
-              style={{
-                flex: 1,
-                alignItems: 'center',
-                paddingVertical: 10,
-                borderWidth: 1,
-                borderRadius: 20,
-                marginRight: 10,
-              }}
-              onPress={hideBottomSheet}>
-              <Text>취소</Text>
-            </Pressable>
-            <Pressable
-              style={{
-                flex: 1,
-                alignItems: 'center',
-                paddingVertical: 10,
-                borderWidth: 1,
-                borderRadius: 20,
-                marginLeft: 10,
-              }}
-              onPress={handleConfirm}>
-              <Text>확인</Text>
-            </Pressable>
-          </View>
-        </>
-      )}
+      <Text
+        style={{
+          fontSize: 16,
+          fontWeight: 'bold',
+          textAlign: 'center',
+          marginBottom: 25,
+        }}>{`${stepLevel}단`}</Text>
+      <View
+        style={{
+          flexDirection: 'row',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          marginBottom: 50,
+        }}>
+        <TouchableOpacity
+          style={{padding: 10, borderWidth: 1, borderRadius: 5}}
+          onPress={handleDecrease}>
+          <Image
+            source={require('../assets/up.png')}
+            style={{width: 24, height: 24}}
+            resizeMode="contain"
+          />
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={{padding: 10, borderWidth: 1, borderRadius: 5}}
+          onPress={handleIncrease}>
+          <Image
+            source={require('../assets/down.png')}
+            style={{width: 24, height: 24}}
+            resizeMode="contain"
+          />
+        </TouchableOpacity>
+      </View>
+      <View
+        style={{
+          flexDirection: 'row',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+        }}>
+        <Pressable
+          style={{
+            flex: 1,
+            alignItems: 'center',
+            paddingVertical: 10,
+            borderWidth: 1,
+            borderRadius: 20,
+            marginRight: 10,
+          }}
+          onPress={hideBottomSheet}>
+          <Text>취소</Text>
+        </Pressable>
+        <Pressable
+          style={{
+            flex: 1,
+            alignItems: 'center',
+            paddingVertical: 10,
+            borderWidth: 1,
+            borderRadius: 20,
+            marginLeft: 10,
+          }}
+          onPress={handleConfirm}>
+          <Text>확인</Text>
+        </Pressable>
+      </View>
     </View>
   );
 };

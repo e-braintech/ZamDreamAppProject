@@ -76,8 +76,17 @@ export const left_head_step_4: string = 'PAED';
 // 5. 머리 좌측 5단계 요청 값
 export const left_head_step_5: string = 'PAEE';
 
-// 6. 향기 on 요청 값
-export const smell_on: string = 'PAFA';
+// 6. 향기 1단계 요청 값
+export const smell_step_1: string = 'PAFB';
 
-// 6. 향기 off 요청 값
-export const smell_off: string = 'PAFB';
+// 6. 향기 2단계 요청 값
+export const smell_step_2: string = 'PAFC';
+
+// 6. 향기 3단계 요청 값
+export const smell_step_3: string = 'PAFD';
+
+// // 6. 향기 on 요청 값
+// export const smell_on: string = 'PAFA';
+
+// // 6. 향기 off 요청 값
+// export const smell_off: string = 'PAFB';

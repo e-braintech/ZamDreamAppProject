@@ -24,7 +24,7 @@ const actionStep: ActionStepType[] = [
   {number: 3, title: '머리'},
   {number: 4, title: '머리 우측'},
   {number: 5, title: '머리 좌측'},
-  {number: 6, title: '향기'},
+  {number: 6, title: '향기 박스'},
 ];
 
 const DetailDeviceScreen = ({navigation}: Props) => {
