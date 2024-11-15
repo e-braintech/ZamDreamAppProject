@@ -43,6 +43,7 @@ export const left_head_step_4: string = 'PAED';
 export const left_head_step_5: string = 'PAEE';
 
 /* 향기 박스 높낮이 단계 요청 값 */
+export const smell_turn_off: string = 'PAFA';
 export const smell_step_1: string = 'PAFB';
 export const smell_step_2: string = 'PAFC';
 export const smell_step_3: string = 'PAFD';

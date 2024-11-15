@@ -29,6 +29,7 @@ import {
   smell_step_1,
   smell_step_2,
   smell_step_3,
+  smell_turn_off,
 } from '../data/actions';
 import {characteristic_UUID, service_UUID} from '../data/uuids';
 import {BLEService} from '../services/BLEService';
@@ -56,7 +57,7 @@ const BluetoothBottomSheetControlView: React.FC<
   const handleIncrease = () => {
     setStepLevel(prev => {
       if (stepNumber === 6) {
-        return prev < 3 ? prev + 1 : prev; // stepNumber가 6일 때 3까지만 증가
+        return prev < 4 ? prev + 1 : prev; // stepNumber가 6일 때 3까지만 증가
       } else {
         return prev < 5 ? prev + 1 : prev; // 다른 경우는 5까지만 증가
       }
@@ -132,10 +133,13 @@ const BluetoothBottomSheetControlView: React.FC<
           : left_head_step_5;
       case 6:
         return stepLevel === 1
-          ? smell_step_1
+          ? // ? smell_step_1
+            smell_turn_off
           : stepLevel === 2
-          ? smell_step_2
+          ? smell_step_1
           : stepLevel === 3
+          ? smell_step_2
+          : stepLevel === 4
           ? smell_step_3
           : null; // 잘못된 stepLevel에 대해 null 반환
       default:
