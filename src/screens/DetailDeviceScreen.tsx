@@ -5,16 +5,44 @@ import {
   BottomSheetView,
 } from '@gorhom/bottom-sheet';
 import {RouteProp, useFocusEffect, useRoute} from '@react-navigation/native';
-import React, {useCallback, useMemo, useRef, useState} from 'react';
+import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {Pressable, SafeAreaView, Text, View} from 'react-native';
 import {NativeStackScreenProps} from 'react-native-screens/lib/typescript/native-stack/types';
 import BluetoothBottomSheetControlView from '../components/BluetoothBottomSheetControlView';
-import {batteryValue} from '../data/actions';
+import {
+  batteryValue,
+  set_head_step_1,
+  set_head_step_2,
+  set_head_step_3,
+  set_head_step_4,
+  set_head_step_5,
+  set_left_head_step_1,
+  set_left_head_step_2,
+  set_left_head_step_3,
+  set_left_head_step_4,
+  set_left_head_step_5,
+  set_neck_step_1,
+  set_neck_step_2,
+  set_neck_step_3,
+  set_neck_step_4,
+  set_neck_step_5,
+  set_right_head_step_1,
+  set_right_head_step_2,
+  set_right_head_step_3,
+  set_right_head_step_4,
+  set_right_head_step_5,
+  set_shoulder_step_1,
+  set_shoulder_step_2,
+  set_shoulder_step_3,
+  set_shoulder_step_4,
+  set_shoulder_step_5,
+} from '../data/actions';
 import {characteristic_UUID, notify_UUID, service_UUID} from '../data/uuids';
 import {useBottomSheetBackHandler} from '../hooks/useBottomSheetBackHandler';
 import {BLEService} from '../services/BLEService';
 import {ActionStepType} from '../types/types';
 import {charToDecimal, decodeFromBase64, encodeToBase64} from '../utils/common';
+import {loadStepLevel} from '../utils/storage/storage';
 
 type Props = NativeStackScreenProps<ROOT_NAVIGATION, 'DetailDevice'>;
 
@@ -59,6 +87,107 @@ const DetailDeviceScreen = ({navigation}: Props) => {
     bottomSheetModalRef.current?.close();
   };
 
+  const getBluetoothData = (part: string, stepLevel: number): string | null => {
+    switch (part) {
+      case 'shoulder':
+        return stepLevel === 1
+          ? set_shoulder_step_1
+          : stepLevel === 2
+          ? set_shoulder_step_2
+          : stepLevel === 3
+          ? set_shoulder_step_3
+          : stepLevel === 4
+          ? set_shoulder_step_4
+          : set_shoulder_step_5;
+      case 'neck':
+        return stepLevel === 1
+          ? set_neck_step_1
+          : stepLevel === 2
+          ? set_neck_step_2
+          : stepLevel === 3
+          ? set_neck_step_3
+          : stepLevel === 4
+          ? set_neck_step_4
+          : set_neck_step_5;
+      case 'head':
+        return stepLevel === 1
+          ? set_head_step_1
+          : stepLevel === 2
+          ? set_head_step_2
+          : stepLevel === 3
+          ? set_head_step_3
+          : stepLevel === 4
+          ? set_head_step_4
+          : set_head_step_5;
+      case 'rightHead':
+        return stepLevel === 1
+          ? set_right_head_step_1
+          : stepLevel === 2
+          ? set_right_head_step_2
+          : stepLevel === 3
+          ? set_right_head_step_3
+          : stepLevel === 4
+          ? set_right_head_step_4
+          : set_right_head_step_5;
+      case 'leftHead':
+        return stepLevel === 1
+          ? set_left_head_step_1
+          : stepLevel === 2
+          ? set_left_head_step_2
+          : stepLevel === 3
+          ? set_left_head_step_3
+          : stepLevel === 4
+          ? set_left_head_step_4
+          : set_left_head_step_5;
+      default:
+        return null;
+    }
+  };
+
+  const sendStoredStepsToDevice = async () => {
+    const parts = ['shoulder', 'neck', 'head', 'rightHead', 'leftHead'];
+
+    parts.forEach(part => {
+      const stepLevel = loadStepLevel(part);
+      const data = getBluetoothData(part, stepLevel);
+
+      if (data) {
+        sendDataToDevice(data, part, stepLevel); // 부위, 단계, 데이터를 함께 전송
+      }
+    });
+  };
+
+  // 데이터를 블루투스 기기로 보내는 함수
+  const sendDataToDevice = (data: string, part: string, stepLevel: number) => {
+    console.log(data);
+
+    try {
+      const base64Data = encodeToBase64(data);
+
+      if (!deviceId) {
+        console.error('No connected device found');
+        return;
+      }
+
+      BLEService.manager
+        .writeCharacteristicWithResponseForDevice(
+          deviceId,
+          service_UUID,
+          characteristic_UUID,
+          base64Data,
+        )
+        .then(res => {
+          console.log(
+            `Data sent successfully for ${part} at level ${stepLevel}`,
+          );
+          // console.log('Data sent: ', JSON.stringify(res, null, 5));
+        })
+        .catch(err => console.log('Error sending data:', err));
+    } catch (error) {
+      console.error('Failed to send data:', error);
+    }
+  };
+
   // 배터리 측정 요청을 보내는 함수
   const requestBatteryLevel = async () => {
     try {
@@ -96,6 +225,10 @@ const DetailDeviceScreen = ({navigation}: Props) => {
       console.log('Failed to request battery level:', error);
     }
   };
+
+  useEffect(() => {
+    sendStoredStepsToDevice();
+  }, []);
 
   useFocusEffect(
     React.useCallback(() => {
