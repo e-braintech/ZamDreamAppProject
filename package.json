@@ -11,11 +11,12 @@
     "test": "jest"
   },
   "dependencies": {
-    "react": "18.3.1",
-    "react-native": "0.76.1",
     "@gorhom/bottom-sheet": "^5.0.5",
     "@react-navigation/native": "^6.1.18",
     "@react-navigation/stack": "^6.4.1",
+    "lottie-react-native": "^7.1.0",
+    "react": "18.3.1",
+    "react-native": "0.76.1",
     "react-native-ble-manager": "^11.5.6",
     "react-native-ble-plx": "^3.2.1",
     "react-native-gesture-handler": "^2.20.2",

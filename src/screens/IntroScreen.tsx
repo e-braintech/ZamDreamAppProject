@@ -1,61 +1,94 @@
+import {BottomSheetModalProvider} from '@gorhom/bottom-sheet';
+import React from 'react';
 import {
-  BottomSheetBackdrop,
-  BottomSheetModal,
-  BottomSheetModalProvider,
-  BottomSheetView,
-} from '@gorhom/bottom-sheet';
-import React, {useCallback, useMemo, useRef} from 'react';
-import {Platform, StyleSheet, Text, View} from 'react-native';
+  ImageBackground,
+  Platform,
+  SafeAreaView,
+  StyleSheet,
+  View,
+} from 'react-native';
+import {PERMISSIONS, requestMultiple, RESULTS} from 'react-native-permissions';
 import {NativeStackScreenProps} from 'react-native-screens/lib/typescript/native-stack/types';
+import IntroLottie from '../components/animation/IntroLottie';
 import ConfirmButton from '../components/ConfirmButton';
-import {useBottomSheetBackHandler} from '../hooks/useBottomSheetBackHandler';
 
 type Props = NativeStackScreenProps<ROOT_NAVIGATION, 'Intro'>;
 
+// 권한 설정 확인하는 함수
+export async function requestPermissions() {
+  if (Platform.OS === 'ios') {
+    // iOS에서 요청할 권한 목록을 배열에 추가
+    const permissions = [
+      PERMISSIONS.IOS.BLUETOOTH,
+      PERMISSIONS.IOS.LOCATION_WHEN_IN_USE,
+    ];
+
+    // requestMultiple을 사용하여 권한 요청
+    const statuses = await requestMultiple(permissions);
+
+    // 각 권한의 요청 결과를 확인
+    if (
+      statuses[PERMISSIONS.IOS.BLUETOOTH] === RESULTS.GRANTED &&
+      statuses[PERMISSIONS.IOS.LOCATION_WHEN_IN_USE] === RESULTS.GRANTED
+    ) {
+      console.log('iOS BLE 및 위치 권한 허용됨');
+    } else {
+      console.log('iOS 권한 거부됨');
+    }
+  } else if (Platform.OS === 'android') {
+    // Android에서 요청할 권한 목록을 배열에 추가
+    const permissions = [
+      PERMISSIONS.ANDROID.BLUETOOTH_SCAN,
+      PERMISSIONS.ANDROID.BLUETOOTH_CONNECT,
+      PERMISSIONS.ANDROID.ACCESS_FINE_LOCATION,
+    ];
+
+    // requestMultiple을 사용하여 권한 요청
+    const statuses = await requestMultiple(permissions);
+
+    // 각 권한의 요청 결과를 확인
+    if (
+      statuses[PERMISSIONS.ANDROID.BLUETOOTH_SCAN] === RESULTS.GRANTED &&
+      statuses[PERMISSIONS.ANDROID.BLUETOOTH_CONNECT] === RESULTS.GRANTED &&
+      statuses[PERMISSIONS.ANDROID.ACCESS_FINE_LOCATION] === RESULTS.GRANTED
+    ) {
+      console.log('Android BLE 및 위치 권한 허용됨');
+    } else {
+      console.log('Android 권한 거부됨');
+    }
+  }
+}
+
 const IntroScreen = ({navigation}: Props) => {
   // Logic
-  const bottomSheetModalRef = useRef<BottomSheetModal>(null);
+  const source =
+    Platform.OS === 'ios'
+      ? require('../assets/intro_ios.png')
+      : require('../assets/intro_android.png');
 
-  const snapPoints = useMemo(() => ['85%'], []);
-
-  const {handleSheetPositionChange} =
-    useBottomSheetBackHandler(bottomSheetModalRef);
-
-  const renderBackdrop = useCallback(
-    (props: any) => <BottomSheetBackdrop {...props} pressBehavior="close" />,
-    [],
-  );
-
-  const handleShowLog = useCallback(() => {
-    bottomSheetModalRef.current?.present();
-  }, []);
+  const handleRequestPermissions = async () => {
+    await requestPermissions();
+  };
 
   // View
   return (
     <BottomSheetModalProvider>
-      <View style={styles.container}>
-        <ConfirmButton
-          title="시작하기"
-          buttonStyle={styles.buttonContainer}
-          textStyle={styles.buttonText}
-          onSubmit={handleShowLog}
-        />
-
-        <BottomSheetModal
-          ref={bottomSheetModalRef}
-          index={1}
-          snapPoints={snapPoints}
-          enablePanDownToClose={true}
-          backdropComponent={renderBackdrop}
-          onChange={handleSheetPositionChange}>
-          <BottomSheetView style={{flex: 1}}>
-            <View
-              style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
-              <Text>test</Text>
-            </View>
-          </BottomSheetView>
-        </BottomSheetModal>
-      </View>
+      <SafeAreaView style={styles.container}>
+        <ImageBackground
+          source={source}
+          resizeMode="cover"
+          style={styles.imageContainer}>
+          <IntroLottie lottieStyle={styles.lottie} />
+          <View style={styles.buttonContainer}>
+            <ConfirmButton
+              title="시작하기"
+              buttonStyle={styles.button}
+              textStyle={styles.buttonText}
+              onSubmit={handleRequestPermissions}
+            />
+          </View>
+        </ImageBackground>
+      </SafeAreaView>
     </BottomSheetModalProvider>
   );
 };
@@ -63,23 +96,33 @@ const IntroScreen = ({navigation}: Props) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'flex-end',
-    alignItems: 'center',
-    paddingHorizontal: 30,
-    backgroundColor: '#ffffff',
+    backgroundColor: 'transparent',
+  },
+  imageContainer: {
+    flex: 1,
+    paddingHorizontal: 32,
+    justifyContent: 'space-between',
+  },
+  lottie: {
+    width: '80%',
+    height: '30%',
+    marginTop: 100,
   },
   buttonContainer: {
+    marginBottom: 50,
+  },
+  button: {
     width: '100%',
-    height: 50,
+    paddingVertical: 16,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: Platform.OS === 'ios' ? 70 : 30,
-    backgroundColor: 'yellow',
+    backgroundColor: '#ffffff',
     borderRadius: 30,
   },
   buttonText: {
+    color: '#240843',
     fontSize: 16,
-    fontWeight: 'medium',
+    fontWeight: 'bold',
   },
 });
 
