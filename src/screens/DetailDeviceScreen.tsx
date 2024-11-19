@@ -6,7 +6,15 @@ import {
 } from '@gorhom/bottom-sheet';
 import {RouteProp, useFocusEffect, useRoute} from '@react-navigation/native';
 import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
-import {Pressable, SafeAreaView, Text, View} from 'react-native';
+import {
+  Image,
+  Pressable,
+  SafeAreaView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
+import LinearGradient from 'react-native-linear-gradient';
 import {NativeStackScreenProps} from 'react-native-screens/lib/typescript/native-stack/types';
 import BluetoothBottomSheetControlView from '../components/BluetoothBottomSheetControlView';
 import {
@@ -296,230 +304,184 @@ const DetailDeviceScreen = ({navigation}: Props) => {
   // Logic
   return (
     <BottomSheetModalProvider>
-      <SafeAreaView style={{flex: 1, backgroundColor: '#ffffff'}}>
-        <View style={{flex: 1, paddingHorizontal: 30}}>
-          <View
-            style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
-            <Text style={{fontSize: 24, fontWeight: 'bold', marginBottom: 30}}>
-              배터리: {batteryLevel}
-            </Text>
-            <Text style={{fontSize: 32, fontWeight: 'bold'}}>
-              나의 베개 설정
-            </Text>
-          </View>
-          <View style={{flex: 1}}>
-            <View
-              style={{width: '100%', height: 200, backgroundColor: 'yellow'}}
+      <LinearGradient colors={['#5c35d1', '#3e1db4']} style={styles.container}>
+        <SafeAreaView style={styles.contentContainer}>
+          <Text style={styles.mainTitle}>나의 베개 설정</Text>
+          <View style={styles.batteryContainer}>
+            <Image
+              source={require('../assets/battery100.png')}
+              style={styles.batteryImage}
+              resizeMode="contain"
             />
+            <Text style={styles.batteryText}>{batteryLevel}%</Text>
           </View>
 
-          <View style={{flex: 1}}>
-            <View
-              style={{
-                flexDirection: 'row',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                marginBottom: 20,
-              }}>
-              <Pressable
-                style={{
-                  flex: 1,
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  padding: 20,
-                  marginHorizontal: 5,
-                  backgroundColor: 'skyblue',
-                  borderRadius: 10,
-                }}
-                onPress={() => handlePresentModalPress(actionStep[0].number)}>
-                <View
-                  style={{
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    width: 20,
-                    height: 20,
-                    borderRadius: 15,
-                    backgroundColor: 'violet',
-                    marginBottom: 5,
-                  }}>
-                  <Text style={{color: 'white', fontWeight: 'bold'}}>
-                    {actionStep[0].number}
-                  </Text>
-                </View>
-                <Text style={{fontSize: 12}}>{actionStep[0].title}</Text>
-              </Pressable>
+          <Image
+            source={require('../assets/pilow.png')}
+            style={styles.pillowImage}
+            resizeMode="contain"
+          />
 
-              <Pressable
-                style={{
-                  flex: 1,
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  padding: 20,
-                  marginHorizontal: 5,
-                  backgroundColor: 'skyblue',
-                  borderRadius: 10,
-                }}
-                onPress={() => handlePresentModalPress(actionStep[1].number)}>
-                <View
-                  style={{
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    width: 20,
-                    height: 20,
-                    borderRadius: 15,
-                    backgroundColor: 'violet',
-                    marginBottom: 5,
-                  }}>
-                  <Text style={{color: 'white', fontWeight: 'bold'}}>
-                    {actionStep[1].number}
-                  </Text>
-                </View>
-                <Text style={{fontSize: 12}}>{actionStep[1].title}</Text>
-              </Pressable>
+          <View style={styles.section1}>
+            <Pressable
+              style={styles.buttonContainer}
+              onPress={() => handlePresentModalPress(actionStep[0].number)}>
+              <View style={styles.numberTextContainer}>
+                <Text style={styles.numberText}>{actionStep[0].number}</Text>
+              </View>
+              <Text style={styles.partText}>{actionStep[0].title}</Text>
+            </Pressable>
 
-              <Pressable
-                style={{
-                  flex: 1,
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  padding: 20,
-                  marginHorizontal: 5,
-                  backgroundColor: 'skyblue',
-                  borderRadius: 10,
-                }}
-                onPress={() => handlePresentModalPress(actionStep[2].number)}>
-                <View
-                  style={{
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    width: 20,
-                    height: 20,
-                    borderRadius: 15,
-                    backgroundColor: 'violet',
-                    marginBottom: 5,
-                  }}>
-                  <Text style={{color: 'white', fontWeight: 'bold'}}>
-                    {actionStep[2].number}
-                  </Text>
-                </View>
-                <Text style={{fontSize: 12}}>{actionStep[2].title}</Text>
-              </Pressable>
-            </View>
+            <Pressable
+              style={styles.buttonContainer}
+              onPress={() => handlePresentModalPress(actionStep[1].number)}>
+              <View style={styles.numberTextContainer}>
+                <Text style={styles.numberText}>{actionStep[1].number}</Text>
+              </View>
+              <Text style={styles.partText}>{actionStep[1].title}</Text>
+            </Pressable>
 
-            <View
-              style={{
-                flexDirection: 'row',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-              }}>
-              <Pressable
-                style={{
-                  flex: 1,
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  padding: 20,
-                  marginHorizontal: 5,
-                  backgroundColor: 'skyblue',
-                  borderRadius: 10,
-                }}
-                onPress={() => handlePresentModalPress(actionStep[3].number)}>
-                <View
-                  style={{
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    width: 20,
-                    height: 20,
-                    borderRadius: 15,
-                    backgroundColor: 'violet',
-                    marginBottom: 5,
-                  }}>
-                  <Text style={{color: 'white', fontWeight: 'bold'}}>
-                    {actionStep[3].number}
-                  </Text>
-                </View>
-                <Text style={{fontSize: 12}}>{actionStep[3].title}</Text>
-              </Pressable>
-
-              <Pressable
-                style={{
-                  flex: 1,
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  padding: 20,
-                  marginHorizontal: 5,
-                  backgroundColor: 'skyblue',
-                  borderRadius: 10,
-                }}
-                onPress={() => handlePresentModalPress(actionStep[4].number)}>
-                <View
-                  style={{
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    width: 20,
-                    height: 20,
-                    borderRadius: 15,
-                    backgroundColor: 'violet',
-                    marginBottom: 5,
-                  }}>
-                  <Text style={{color: 'white', fontWeight: 'bold'}}>
-                    {actionStep[4].number}
-                  </Text>
-                </View>
-                <Text style={{fontSize: 12}}>{actionStep[4].title}</Text>
-              </Pressable>
-
-              <Pressable
-                style={{
-                  flex: 1,
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  padding: 20,
-                  marginHorizontal: 5,
-                  backgroundColor: 'skyblue',
-                  borderRadius: 10,
-                }}
-                onPress={() => handlePresentModalPress(actionStep[5].number)}>
-                <View
-                  style={{
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    width: 20,
-                    height: 20,
-                    borderRadius: 15,
-                    backgroundColor: 'violet',
-                    marginBottom: 5,
-                  }}>
-                  <Text style={{color: 'white', fontWeight: 'bold'}}>
-                    {actionStep[5].number}
-                  </Text>
-                </View>
-                <Text style={{fontSize: 12}}>{actionStep[5].title}</Text>
-              </Pressable>
-            </View>
+            <Pressable
+              style={styles.buttonContainer}
+              onPress={() => handlePresentModalPress(actionStep[2].number)}>
+              <View style={styles.numberTextContainer}>
+                <Text style={styles.numberText}>{actionStep[2].number}</Text>
+              </View>
+              <Text style={styles.partText}>{actionStep[2].title}</Text>
+            </Pressable>
           </View>
-        </View>
 
-        <BottomSheetModal
-          ref={bottomSheetModalRef}
-          index={1}
-          snapPoints={snapPoints}
-          enablePanDownToClose={true}
-          backdropComponent={renderBackdrop}
-          onChange={handleSheetPositionChange}>
-          <BottomSheetView style={{flex: 1}}>
-            {selectedStep && (
-              <BluetoothBottomSheetControlView
-                stepNumber={selectedStep.number}
-                title={selectedStep.title}
-                deviceID={deviceId}
-                hideBottomSheet={hideBottomSheet}
-              />
-            )}
-          </BottomSheetView>
-        </BottomSheetModal>
-      </SafeAreaView>
+          <View style={styles.section2}>
+            <Pressable
+              style={styles.buttonContainer}
+              onPress={() => handlePresentModalPress(actionStep[3].number)}>
+              <View style={styles.numberTextContainer}>
+                <Text style={styles.numberText}>{actionStep[3].number}</Text>
+              </View>
+              <Text style={styles.partText}>{actionStep[3].title}</Text>
+            </Pressable>
+
+            <Pressable
+              style={styles.buttonContainer}
+              onPress={() => handlePresentModalPress(actionStep[4].number)}>
+              <View style={styles.numberTextContainer}>
+                <Text style={styles.numberText}>{actionStep[4].number}</Text>
+              </View>
+              <Text style={styles.partText}>{actionStep[4].title}</Text>
+            </Pressable>
+
+            <Pressable
+              style={styles.buttonContainer}
+              onPress={() => handlePresentModalPress(actionStep[5].number)}>
+              <View style={styles.numberTextContainer}>
+                <Text style={styles.numberText}>{actionStep[5].number}</Text>
+              </View>
+              <Text style={styles.partText}>{actionStep[5].title}</Text>
+            </Pressable>
+          </View>
+
+          <BottomSheetModal
+            ref={bottomSheetModalRef}
+            index={1}
+            snapPoints={snapPoints}
+            enablePanDownToClose={true}
+            backdropComponent={renderBackdrop}
+            onChange={handleSheetPositionChange}>
+            <BottomSheetView style={{flex: 1}}>
+              {selectedStep && (
+                <BluetoothBottomSheetControlView
+                  stepNumber={selectedStep.number}
+                  title={selectedStep.title}
+                  deviceID={deviceId}
+                  hideBottomSheet={hideBottomSheet}
+                />
+              )}
+            </BottomSheetView>
+          </BottomSheetModal>
+        </SafeAreaView>
+      </LinearGradient>
     </BottomSheetModalProvider>
   );
 };
 
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  contentContainer: {
+    flex: 1,
+    paddingHorizontal: 32,
+  },
+  mainTitle: {
+    marginTop: 136,
+    textAlign: 'center',
+    fontSize: 30,
+    fontWeight: 'bold',
+    color: '#ffffff',
+  },
+  batteryContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 8,
+  },
+  batteryImage: {
+    width: 24,
+    height: 24,
+    marginRight: 10,
+  },
+  batteryText: {
+    fontSize: 16,
+    fontWeight: 'regular',
+    color: '#ffffff',
+  },
+  pillowImage: {
+    maxWidth: '100%',
+    maxHeight: '50%',
+  },
+
+  section1: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  section2: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  buttonContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 16,
+    marginHorizontal: 5,
+    backgroundColor: '#5B3BC4',
+    borderRadius: 10,
+    borderWidth: 0.1,
+    borderColor: '#ffffff',
+  },
+  numberTextContainer: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: 20,
+    height: 20,
+    borderRadius: 15,
+    backgroundColor: '#ffffff',
+    marginBottom: 10,
+  },
+  numberText: {
+    color: '#240843',
+    fontWeight: 'bold',
+    fontSize: 16,
+  },
+  partText: {
+    color: '#ffffff',
+    fontWeight: 'bold',
+    fontSize: 16,
+  },
+});
 export default DetailDeviceScreen;

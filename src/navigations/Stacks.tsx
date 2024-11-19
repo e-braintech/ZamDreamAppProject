@@ -22,7 +22,7 @@ const Stacks = () => {
       <Stack.Screen
         name="DetailDevice"
         component={DetailDeviceScreen}
-        options={{headerTitle: '', headerShadowVisible: false}}
+        options={{headerShown: false}}
       />
     </Stack.Navigator>
   );
