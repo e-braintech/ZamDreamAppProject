@@ -1,10 +1,10 @@
 import React from 'react';
-import {Pressable, Text, TextStyle, ViewStyle} from 'react-native';
+import {Pressable, StyleProp, Text, TextStyle, ViewStyle} from 'react-native';
 
 interface ConfirmButtonProps {
   title: string;
-  buttonStyle: ViewStyle;
-  textStyle: TextStyle;
+  buttonStyle: StyleProp<ViewStyle>; // 수정된 타입
+  textStyle: StyleProp<TextStyle>; // 배열 스타일 지원
   onSubmit: () => void;
 }
 

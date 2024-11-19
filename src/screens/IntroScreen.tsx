@@ -10,14 +10,14 @@ import {
   Platform,
   SafeAreaView,
   StyleSheet,
-  Text,
   View,
 } from 'react-native';
-import {BleManager} from 'react-native-ble-plx';
+import {BleManager, Device} from 'react-native-ble-plx';
 import {PERMISSIONS, requestMultiple, RESULTS} from 'react-native-permissions';
 import {NativeStackScreenProps} from 'react-native-screens/lib/typescript/native-stack/types';
 import IntroLottie from '../components/animation/IntroLottie';
 import BluetoothModal from '../components/BluetoothModal';
+import BottomSheetBluetoothConnectView from '../components/BottomSheetBluetoothConnectView';
 import ConfirmButton from '../components/ConfirmButton';
 import {useBottomSheetBackHandler} from '../hooks/useBottomSheetBackHandler';
 
@@ -28,6 +28,7 @@ export async function requestPermissions(
   bleManager: BleManager,
   setIsModalVisible: React.Dispatch<React.SetStateAction<boolean>>,
   isBottomSheetShow: () => void,
+  startBluetoothDeviceScan: () => void,
 ) {
   if (Platform.OS === 'ios') {
     // iOS에서 요청할 권한 목록을 배열에 추가
@@ -45,7 +46,12 @@ export async function requestPermissions(
       statuses[PERMISSIONS.IOS.LOCATION_WHEN_IN_USE] === RESULTS.GRANTED
     ) {
       console.log('iOS BLE 및 위치 권한 허용됨');
-      checkBluetoothState(bleManager, setIsModalVisible, isBottomSheetShow);
+      checkBluetoothState(
+        bleManager,
+        setIsModalVisible,
+        isBottomSheetShow,
+        startBluetoothDeviceScan,
+      );
     } else {
       console.log('iOS 권한 거부됨');
     }
@@ -67,7 +73,12 @@ export async function requestPermissions(
       statuses[PERMISSIONS.ANDROID.ACCESS_FINE_LOCATION] === RESULTS.GRANTED
     ) {
       console.log('Android BLE 및 위치 권한 허용됨');
-      checkBluetoothState(bleManager, setIsModalVisible, isBottomSheetShow);
+      checkBluetoothState(
+        bleManager,
+        setIsModalVisible,
+        isBottomSheetShow,
+        startBluetoothDeviceScan,
+      );
     } else {
       console.log('Android 권한 거부됨');
     }
@@ -79,6 +90,7 @@ async function checkBluetoothState(
   bleManager: BleManager,
   setIsModalVisible: React.Dispatch<React.SetStateAction<boolean>>,
   isBottomSheetShow: () => void,
+  startBluetoothDeviceScan: () => void,
 ) {
   const state = await bleManager.state(); // BLE 상태 가져오기
 
@@ -89,6 +101,7 @@ async function checkBluetoothState(
     console.log('블루투스가 켜져 있습니다.');
     setIsModalVisible(false);
     isBottomSheetShow();
+    startBluetoothDeviceScan();
   }
 }
 
@@ -102,6 +115,9 @@ const IntroScreen = ({navigation}: Props) => {
   const bleManager = new BleManager();
 
   const [isModalVisible, setIsModalVisible] = useState(false); // Modal 상태
+  const [devices, setDevices] = useState<Device[]>([]); // 탐색된 블루투스 기기 목록
+  const [isScanning, setIsScanning] = useState(false); // 탐색 상태
+  const [isScanFinished, setIsScanFinished] = useState(false); // 탐색 완료 상태
 
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
 
@@ -115,14 +131,54 @@ const IntroScreen = ({navigation}: Props) => {
     [],
   );
 
+  const presentBottomSheet = () => {
+    bottomSheetModalRef.current?.present();
+  };
+
   const closeModal = () => {
     setIsModalVisible(false);
   };
 
   const handleRequestPermissions = async () => {
-    await requestPermissions(bleManager, setIsModalVisible, () => {
-      bottomSheetModalRef.current?.present();
+    await requestPermissions(
+      bleManager,
+      setIsModalVisible,
+      presentBottomSheet,
+      startBluetoothDeviceScan,
+    );
+  };
+
+  const startBluetoothDeviceScan = () => {
+    if (isScanning) {
+      return;
+    }
+
+    setIsScanning(true);
+    setDevices([]);
+
+    bleManager.startDeviceScan(null, null, (error, device) => {
+      if (error) {
+        console.error('Device scan error:', error.message);
+        bleManager.stopDeviceScan();
+        setIsScanning(false);
+        return;
+      }
+
+      if (device && device.name) {
+        setDevices(prevDevices => {
+          // 중복 기기 방지
+          const exists = prevDevices.some(d => d.id === device.id);
+          return exists ? prevDevices : [...prevDevices, device];
+        });
+      }
     });
+
+    // 3초 후 탐색 중지
+    setTimeout(() => {
+      bleManager.stopDeviceScan();
+      setIsScanning(false);
+      setIsScanFinished(true); // 탐색 완료 상태 업데이트
+    }, 3000);
   };
 
   // View
@@ -149,16 +205,14 @@ const IntroScreen = ({navigation}: Props) => {
             snapPoints={snapPoints}
             enablePanDownToClose={true}
             backdropComponent={renderBackdrop}
-            onChange={handleSheetPositionChange}>
+            onChange={handleSheetPositionChange}
+            handleStyle={{backgroundColor: '#F3F1FF', borderRadius: 50}}>
             <BottomSheetView style={{flex: 1}}>
-              <View
-                style={{
-                  flex: 1,
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                }}>
-                <Text>test</Text>
-              </View>
+              <BottomSheetBluetoothConnectView
+                isScanningCompleted={isScanFinished}
+                devices={devices}
+                bleManager={bleManager}
+              />
             </BottomSheetView>
           </BottomSheetModal>
         </ImageBackground>
