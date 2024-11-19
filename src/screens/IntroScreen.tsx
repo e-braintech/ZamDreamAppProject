@@ -25,7 +25,9 @@ type Props = NativeStackScreenProps<ROOT_NAVIGATION, 'Intro'>;
 
 // 권한 설정 확인하는 함수
 export async function requestPermissions(
+  bleManager: BleManager,
   setIsModalVisible: React.Dispatch<React.SetStateAction<boolean>>,
+  isBottomSheetShow: () => void,
 ) {
   if (Platform.OS === 'ios') {
     // iOS에서 요청할 권한 목록을 배열에 추가
@@ -43,7 +45,7 @@ export async function requestPermissions(
       statuses[PERMISSIONS.IOS.LOCATION_WHEN_IN_USE] === RESULTS.GRANTED
     ) {
       console.log('iOS BLE 및 위치 권한 허용됨');
-      checkBluetoothState(setIsModalVisible);
+      checkBluetoothState(bleManager, setIsModalVisible, isBottomSheetShow);
     } else {
       console.log('iOS 권한 거부됨');
     }
@@ -65,7 +67,7 @@ export async function requestPermissions(
       statuses[PERMISSIONS.ANDROID.ACCESS_FINE_LOCATION] === RESULTS.GRANTED
     ) {
       console.log('Android BLE 및 위치 권한 허용됨');
-      checkBluetoothState(setIsModalVisible);
+      checkBluetoothState(bleManager, setIsModalVisible, isBottomSheetShow);
     } else {
       console.log('Android 권한 거부됨');
     }
@@ -74,9 +76,10 @@ export async function requestPermissions(
 
 // 블루투스 상태 확인 함수
 async function checkBluetoothState(
+  bleManager: BleManager,
   setIsModalVisible: React.Dispatch<React.SetStateAction<boolean>>,
+  isBottomSheetShow: () => void,
 ) {
-  const bleManager = new BleManager();
   const state = await bleManager.state(); // BLE 상태 가져오기
 
   if (state !== 'PoweredOn') {
@@ -85,6 +88,7 @@ async function checkBluetoothState(
   } else {
     console.log('블루투스가 켜져 있습니다.');
     setIsModalVisible(false);
+    isBottomSheetShow();
   }
 }
 
@@ -94,6 +98,8 @@ const IntroScreen = ({navigation}: Props) => {
     Platform.OS === 'ios'
       ? require('../assets/intro_ios.png')
       : require('../assets/intro_android.png');
+
+  const bleManager = new BleManager();
 
   const [isModalVisible, setIsModalVisible] = useState(false); // Modal 상태
 
@@ -114,7 +120,9 @@ const IntroScreen = ({navigation}: Props) => {
   };
 
   const handleRequestPermissions = async () => {
-    await requestPermissions(setIsModalVisible);
+    await requestPermissions(bleManager, setIsModalVisible, () => {
+      bottomSheetModalRef.current?.present();
+    });
   };
 
   // View

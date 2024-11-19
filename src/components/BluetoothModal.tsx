@@ -2,6 +2,7 @@ import LottieView from 'lottie-react-native';
 import React from 'react';
 import {
   Image,
+  Linking,
   Modal,
   Platform,
   StyleSheet,
@@ -9,6 +10,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import {BLEService} from '../services/BLEService';
 import ConfirmButton from './ConfirmButton';
 
 interface BluetoothModalProps {
@@ -23,8 +25,16 @@ const BluetoothModal: React.FC<BluetoothModalProps> = ({
   // Logic
   const buttonText = Platform.OS === 'ios' ? '설정' : '블루투스 켜기';
 
-  const test = () => {
-    console.log('test');
+  const handleBluetoothState = () => {
+    if (Platform.OS === 'ios') {
+      // iOS에서는 설정 페이지로 이동
+      onRequestClose();
+      Linking.openURL('app-settings://bluetooth/RedreamApp'); // iOS 설정 페이지로 이동
+    } else {
+      // Android에서는 BLEService로 블루투스를 켤 수 있음
+      BLEService.enable();
+      onRequestClose();
+    }
   };
 
   // View
@@ -61,7 +71,7 @@ const BluetoothModal: React.FC<BluetoothModalProps> = ({
             title={buttonText}
             buttonStyle={styles.modalButton}
             textStyle={styles.modalButtonText}
-            onSubmit={test}
+            onSubmit={handleBluetoothState}
           />
         </View>
       </View>
