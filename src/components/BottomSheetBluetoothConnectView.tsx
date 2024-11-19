@@ -1,123 +1,167 @@
 import LottieView from 'lottie-react-native';
-import React, {useState} from 'react';
-import {Alert, StyleSheet, Text, View} from 'react-native';
-import {BleManager, Device} from 'react-native-ble-plx';
+import React, {useEffect, useState} from 'react';
+import {StyleSheet, Text, View} from 'react-native';
+import {Device} from 'react-native-ble-plx';
+import {NativeStackNavigationProp} from 'react-native-screens/lib/typescript/native-stack/types';
+import {BLEService} from '../services/BLEService';
 import ConfirmButton from './ConfirmButton';
 
 interface BottomSheetBluetoothConnectViewProps {
-  isScanningCompleted: boolean;
-  devices: Device[]; // 탐색된 BLE 기기 목록
-  bleManager: BleManager; // BLE Manager 인스턴스
+  navigation: NativeStackNavigationProp<ROOT_NAVIGATION, 'Intro'>;
 }
+
 const BottomSheetBluetoothConnectView: React.FC<
   BottomSheetBluetoothConnectViewProps
-> = ({isScanningCompleted, devices, bleManager}) => {
+> = ({navigation}) => {
   // Logic
-  const [isConnected, setIsConnected] = useState<boolean | null>(null); // 연결 상태
-  const [isConnecting, setIsConnecting] = useState(false); // 연결 중 상태
+  const [devices, setDevices] = useState<Device[]>([]); // 탐색된 BLE 기기
+  const [isScanning, setIsScanning] = useState(false); // 스캔 상태
+  const [scanFinished, setScanFinished] = useState(false); // 스캔 종료 상태
+  const [connectedDevice, setConnectedDevice] = useState<Device | null>(null); // 연결된 기기
+  const [connectionState, setConnectionState] = useState<
+    'success' | 'fail' | null
+  >(null); // 연결 상태
 
-  // 기기와 BLE 연결 시도
-  const connectToDevice = async (device: Device) => {
-    try {
-      setIsConnecting(true); // 연결 시도 시작
-      console.log(`Connecting to device: ${device.name}`);
-      const connectedDevice = await bleManager.connectToDevice(device.id);
-      await bleManager.discoverAllServicesAndCharacteristicsForDevice(
-        connectedDevice.id,
+  // BLE 기기 추가 또는 업데이트
+  const addOrUpdateDevice = (newDevice: Device) => {
+    setDevices(prevDevices => {
+      // 기존에 동일한 ID를 가진 기기가 있는지 확인
+      const existingDeviceIndex = prevDevices.findIndex(
+        device => device.id === newDevice.id,
       );
-      setIsConnected(true); // 연결 성공
-      Alert.alert('연결 성공', `${device.name}에 성공적으로 연결되었습니다.`);
-    } catch (error) {
-      console.error('Device connection error:', error);
-      setIsConnected(false); // 연결 실패
-      Alert.alert('연결 실패', '기기 연결에 실패했습니다.');
-    } finally {
-      setIsConnecting(false); // 연결 시도 종료
-    }
-  };
 
-  // ConfirmButton 클릭 핸들러
-  const handleSubmit = () => {
-    if (isConnecting) {
-      Alert.alert('진행 중', '기기 연결을 시도 중입니다. 잠시만 기다려주세요.');
-      return;
-    }
-
-    if (!isScanningCompleted) {
-      Alert.alert('탐색 중', '탐색이 완료된 후 버튼을 눌러주세요.');
-      return;
-    }
-
-    if (isConnected === null) {
-      // 이름이 "ZAMDREAM"인 기기 필터링
-      const targetDevice = devices.find(device => device.name === 'ZAMDREAM');
-      if (targetDevice) {
-        connectToDevice(targetDevice); // 기기 연결 시도
-      } else {
-        Alert.alert('기기 없음', '"ZAMDREAM" 이름의 기기를 찾을 수 없습니다.');
+      // 중복 기기가 없을 경우 추가
+      if (existingDeviceIndex === -1) {
+        return [...prevDevices, newDevice];
       }
-    } else if (isConnected) {
-      console.log('다음 단계로 이동합니다.'); // 연결 성공 시 동작
-    } else {
-      console.log('재시도합니다.'); // 연결 실패 시 재시도
+
+      // 중복 기기가 있으면 기존 리스트 반환 (변경 없음)
+      return prevDevices;
+    });
+  };
+
+  // BLE 기기 스캔 함수
+  const startDeviceScan = () => {
+    if (isScanning) return; // 중복 실행 방지
+
+    setIsScanning(true); // 스캔 상태 시작
+    setScanFinished(false); // 스캔 종료 상태 초기화
+    setDevices([]); // 이전 스캔 결과 초기화
+
+    // BLEService의 scanDevices 메소드를 호출하여 탐색 시작
+    BLEService.scanDevices(device => {
+      if (device.name) {
+        addOrUpdateDevice(device); // 기기 추가
+      }
+    });
+
+    // 3초 후 스캔 종료
+    setTimeout(() => {
+      BLEService.manager.stopDeviceScan(); // BLE 스캔 중지
+      setIsScanning(false);
+      setScanFinished(true);
+      // connectToZamDreamDevice(); // "ZAMDREAM" 기기 연결 시도
+    }, 3000);
+  };
+
+  const connectZamDreamDevice = () => {
+    const deviceName = devices.find(device => device.name === 'ZAMDREAM');
+
+    if (!deviceName) {
+      console.log('ZAMDREAM 기기를 찾을 수 없습니다.');
+      return;
+    }
+
+    BLEService.connectToDevice(deviceName.id)
+      .then(device => {
+        setConnectedDevice(device);
+        setConnectionState('success');
+        console.log(`ZAMDREAM 기기와 연결되었습니다: ${device.name}`);
+      })
+      .catch(error => {
+        setConnectionState('fail');
+        console.error('ZAMDREAM 기기와 연결 실패:', error);
+      });
+  };
+
+  const navigateToDetailScreen = () => {
+    if (connectedDevice) {
+      navigation.navigate('DetailDevice', {deviceId: connectedDevice.id});
     }
   };
+
+  // 컴포넌트가 마운트될 때 BLE 스캔 시작
+  useEffect(() => {
+    startDeviceScan();
+
+    return () => {
+      BLEService.manager.stopDeviceScan(); // 언마운트 시 스캔 중지
+    };
+  }, []);
 
   // View
   return (
     <View style={styles.container}>
       {/* 상태에 따라 다른 텍스트 렌더링 */}
       <Text style={styles.mainTitle}>
-        {isConnected === null
-          ? isScanningCompleted
-            ? '베개 찾기 완료'
-            : '베개 찾는 중'
-          : isConnected
+        {connectionState === 'success'
           ? '베개 연결 완료'
-          : '연결 실패'}
+          : connectionState === 'fail'
+          ? '베개 연결 실패'
+          : scanFinished
+          ? '베개 찾기 완료'
+          : '베개 찾는 중'}
       </Text>
       <Text style={styles.subTitle}>
-        {isConnected === null
-          ? isScanningCompleted
-            ? '다음 단계로 이동해주세요.'
-            : '잠시만 기다려주세요.'
-          : isConnected
-          ? '베개 연결이 완료 되었습니다. 잠드림을 만나보세요.'
-          : '연결에 실패했습니다. 다시 시도해주세요.'}
+        {connectionState === 'success'
+          ? '기기와 성공적으로 연결되었습니다.'
+          : connectionState === 'fail'
+          ? '기기 연결에 실패했습니다. 다시 시도해주세요.'
+          : scanFinished
+          ? '다음 단계로 이동해주세요.'
+          : '잠시만 기다려주세요.'}
       </Text>
 
       {/* 상태에 따라 다른 Lottie 애니메이션 렌더링 */}
       <LottieView
         source={
-          isConnected === null
-            ? isScanningCompleted
-              ? require('../assets/lottie/find.json')
-              : require('../assets/lottie/search.json')
-            : isConnected
+          connectionState === 'success'
             ? require('../assets/lottie/connect.json')
-            : require('../assets/lottie/fail.json')
+            : connectionState === 'fail'
+            ? require('../assets/lottie/fail.json')
+            : scanFinished
+            ? require('../assets/lottie/find.json')
+            : require('../assets/lottie/search.json')
         }
         style={styles.lottie}
         autoPlay={true}
-        loop={isConnected === null} // 연결 성공/실패 시 애니메이션 반복 중지
+        loop={true}
       />
 
       <ConfirmButton
         title={
-          isConnected === null
-            ? '다음'
-            : isConnected
+          connectionState === 'success'
             ? '시작하기'
-            : '재시도 하기'
+            : connectionState === 'fail'
+            ? '재시도 하기'
+            : scanFinished
+            ? '다음'
+            : '다음'
         }
         buttonStyle={[
           styles.button,
-          {
-            backgroundColor: isConnected === null ? '#C7C7E8' : '#371B9E',
-          },
+          {backgroundColor: scanFinished ? '#371B9E' : '#C7C7E8'},
         ]}
         textStyle={styles.buttonText}
-        onSubmit={handleSubmit}
+        onSubmit={
+          connectionState === 'success'
+            ? navigateToDetailScreen
+            : connectionState === 'fail'
+            ? connectZamDreamDevice
+            : scanFinished
+            ? connectZamDreamDevice
+            : () => {} // 기본 빈 함수
+        }
       />
     </View>
   );

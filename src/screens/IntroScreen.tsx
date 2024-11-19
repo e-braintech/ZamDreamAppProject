@@ -10,7 +10,6 @@ import {
   Platform,
   SafeAreaView,
   StyleSheet,
-  Text,
   View,
 } from 'react-native';
 import {BleManager} from 'react-native-ble-plx';
@@ -18,6 +17,7 @@ import {PERMISSIONS, requestMultiple, RESULTS} from 'react-native-permissions';
 import {NativeStackScreenProps} from 'react-native-screens/lib/typescript/native-stack/types';
 import IntroLottie from '../components/animation/IntroLottie';
 import BluetoothModal from '../components/BluetoothModal';
+import BottomSheetBluetoothConnectView from '../components/BottomSheetBluetoothConnectView';
 import ConfirmButton from '../components/ConfirmButton';
 import {useBottomSheetBackHandler} from '../hooks/useBottomSheetBackHandler';
 
@@ -151,16 +151,10 @@ const IntroScreen = ({navigation}: Props) => {
             snapPoints={snapPoints}
             enablePanDownToClose={true}
             backdropComponent={renderBackdrop}
-            onChange={handleSheetPositionChange}>
+            onChange={handleSheetPositionChange}
+            handleStyle={{backgroundColor: '#F3F1FF', borderRadius: 50}}>
             <BottomSheetView style={{flex: 1}}>
-              <View
-                style={{
-                  flex: 1,
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                }}>
-                <Text>test</Text>
-              </View>
+              <BottomSheetBluetoothConnectView navigation={navigation} />
             </BottomSheetView>
           </BottomSheetModal>
         </ImageBackground>

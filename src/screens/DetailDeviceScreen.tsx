@@ -144,6 +144,40 @@ const DetailDeviceScreen = ({navigation}: Props) => {
     }
   };
 
+  const discoverServicesAndCharacteristics = async (deviceId: string) => {
+    try {
+      await BLEService.manager.discoverAllServicesAndCharacteristicsForDevice(
+        deviceId,
+      );
+
+      const services = await BLEService.manager.servicesForDevice(deviceId);
+      console.log('Discovered services:', services);
+
+      for (const service of services) {
+        const characteristics =
+          await BLEService.manager.characteristicsForDevice(
+            deviceId,
+            service.uuid,
+          );
+        console.log(
+          `Service ${service.uuid} has characteristics:`,
+          characteristics,
+        );
+      }
+    } catch (error) {
+      console.error('Failed to discover services and characteristics:', error);
+    }
+  };
+
+  const checkDeviceConnection = async (deviceId: string) => {
+    const isConnected = await BLEService.manager.isDeviceConnected(deviceId);
+    if (!isConnected) {
+      console.error('Device is not connected. Attempting to reconnect...');
+      await BLEService.manager.connectToDevice(deviceId);
+      await discoverServicesAndCharacteristics(deviceId);
+    }
+  };
+
   const sendStoredStepsToDevice = async () => {
     const parts = ['shoulder', 'neck', 'head', 'rightHead', 'leftHead'];
 
@@ -182,7 +216,10 @@ const DetailDeviceScreen = ({navigation}: Props) => {
           );
           // console.log('Data sent: ', JSON.stringify(res, null, 5));
         })
-        .catch(err => console.log('Error sending data:', err));
+        .catch(err => {
+          // console.log('Error sending data:', err)
+          return;
+        });
     } catch (error) {
       console.error('Failed to send data:', error);
     }
@@ -191,24 +228,44 @@ const DetailDeviceScreen = ({navigation}: Props) => {
   // 배터리 측정 요청을 보내는 함수
   const requestBatteryLevel = async () => {
     try {
-      const base64Data = encodeToBase64(batteryValue);
+      if (!deviceId) {
+        console.error('No connected device found');
+        return;
+      }
 
-      // 측정 요청 전송
+      // 연결 상태 확인 및 재연결
+      const isConnected = await BLEService.manager.isDeviceConnected(deviceId);
+      if (!isConnected) {
+        console.error('Device is not connected. Reconnecting...');
+        await BLEService.manager.connectToDevice(deviceId);
+      }
+
+      // 서비스 및 특성 검색
+      await BLEService.manager.discoverAllServicesAndCharacteristicsForDevice(
+        deviceId,
+      );
+
+      // 배터리 요청 데이터 생성 (기기 문서를 참조해 데이터 형식 확인 필요)
+      const base64Data = encodeToBase64(batteryValue); // 요청 데이터 변경 필요
+
+      // 배터리 요청 전송
       await BLEService.manager.writeCharacteristicWithResponseForDevice(
         deviceId,
-        service_UUID,
-        characteristic_UUID,
+        service_UUID, // 배터리 서비스 UUID
+        characteristic_UUID, // 배터리 요청 특성 UUID
         base64Data,
       );
 
-      // 배터리 응답 모니터링 설정
-      await BLEService.manager.monitorCharacteristicForDevice(
+      console.log('Battery level request sent.');
+
+      // 배터리 응답 모니터링
+      BLEService.manager.monitorCharacteristicForDevice(
         deviceId,
-        service_UUID,
-        notify_UUID,
+        service_UUID, // 배터리 Notify 서비스 UUID
+        notify_UUID, // 배터리 Notify 특성 UUID
         (error, characteristic) => {
           if (error) {
-            // console.log('Failed to monitor characteristic:', error);
+            console.error('Failed to monitor characteristic:', error);
             return;
           }
 
@@ -222,7 +279,7 @@ const DetailDeviceScreen = ({navigation}: Props) => {
         },
       );
     } catch (error) {
-      console.log('Failed to request battery level:', error);
+      console.error('Failed to request battery level:', error);
     }
   };
 
