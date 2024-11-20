@@ -96,11 +96,27 @@ const BottomSheetBluetoothConnectView: React.FC<
   };
 
   // ConfirmButton 클릭 이벤트
-  const handleButtonPress = () => {
+  const handleButtonPress = async () => {
     if (connectionStatus === 'success' && connectedDeviceId) {
+      // 연결 성공 시 상세 화면으로 이동
       navigation.navigate('DetailDevice', {deviceId: connectedDeviceId});
     } else if (connectionStatus === 'fail') {
-      connectToDevice(); // 연결 실패 시 다시 시도
+      // 연결 실패 시 다시 연결 시도
+      await connectToDevice();
+    } else if (isScanComplete && !connectionStatus) {
+      // 스캔 완료 후 아직 연결 시도하지 않은 경우
+      await connectToDevice();
+    } else {
+      console.log('아직 준비가 완료되지 않았습니다.');
+    }
+  };
+
+  // ConfirmButton에 항상 함수 할당
+  const handleConfirmButtonPress = () => {
+    if (isScanComplete && !isConnecting) {
+      handleButtonPress();
+    } else {
+      console.log('스캔 중이거나 연결 중입니다.');
     }
   };
 
@@ -126,9 +142,7 @@ const BottomSheetBluetoothConnectView: React.FC<
           {backgroundColor: isScanComplete ? '#371B9E' : '#C7C7E8'},
         ]}
         textStyle={styles.buttonText}
-        onSubmit={
-          isScanComplete && !isConnecting ? handleButtonPress : () => {}
-        }
+        onSubmit={handleConfirmButtonPress}
       />
     </View>
   );
