@@ -9,12 +9,11 @@ import ConfirmButton from './ConfirmButton';
 interface BottomSheetBluetoothConnectViewProps {
   navigation: NativeStackNavigationProp<ROOT_NAVIGATION, 'Intro'>;
   devices: Device[]; // IntroScreen에서 전달받은 BLE 기기 목록
-  ReDeviceScan: () => void; // IntroScreen에서 전달받은 BLE 기기 탐색 함수
 }
 
 const BottomSheetBluetoothConnectView: React.FC<
   BottomSheetBluetoothConnectViewProps
-> = ({navigation, devices, ReDeviceScan}) => {
+> = ({navigation, devices}) => {
   // Logic
   const [isScanComplete, setIsScanComplete] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false); // 연결 상태 관리
@@ -109,7 +108,6 @@ const BottomSheetBluetoothConnectView: React.FC<
     } else if (connectionStatus === 'fail') {
       // 연결 실패 시 다시 연결 시도
       console.log('연결 재시도 중...');
-      ReDeviceScan(); // 연결 실패 시 다시 BLE 기기 탐색 시작
       setConnectionStatus(null); // 연결 상태 초기화
     } else if (isScanComplete && !connectionStatus) {
       // 스캔 완료 후 연결 시도

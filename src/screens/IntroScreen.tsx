@@ -169,7 +169,6 @@ const IntroScreen = ({navigation}: Props) => {
               <BottomSheetBluetoothConnectView
                 navigation={navigation}
                 devices={devices}
-                ReDeviceScan={startDeviceScan}
               />
             </BottomSheetView>
           </BottomSheetModal>
