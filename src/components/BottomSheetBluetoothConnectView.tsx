@@ -1,6 +1,6 @@
 import LottieView from 'lottie-react-native';
 import React, {useEffect, useState} from 'react';
-import {Alert, StyleSheet, Text, View} from 'react-native';
+import {StyleSheet, Text, View} from 'react-native';
 import {Device} from 'react-native-ble-plx';
 import {NativeStackNavigationProp} from 'react-native-screens/lib/typescript/native-stack/types';
 import {BLEService} from '../services/BLEService';
@@ -9,11 +9,12 @@ import ConfirmButton from './ConfirmButton';
 interface BottomSheetBluetoothConnectViewProps {
   navigation: NativeStackNavigationProp<ROOT_NAVIGATION, 'Intro'>;
   devices: Device[]; // IntroScreen에서 전달받은 BLE 기기 목록
+  ReDeviceScan: () => void; // IntroScreen에서 전달받은 BLE 기기 탐색 함수
 }
 
 const BottomSheetBluetoothConnectView: React.FC<
   BottomSheetBluetoothConnectViewProps
-> = ({navigation, devices}) => {
+> = ({navigation, devices, ReDeviceScan}) => {
   // Logic
   const [isScanComplete, setIsScanComplete] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false); // 연결 상태 관리
@@ -35,9 +36,9 @@ const BottomSheetBluetoothConnectView: React.FC<
 
   const subTitle =
     connectionStatus === 'success'
-      ? '이제 사용할 준비가 되었습니다.'
+      ? '베개 연결이 완료되었습니다.\n잠드림을 만나보세요.'
       : connectionStatus === 'fail'
-      ? '다시 시도해주세요.'
+      ? '배개 연결이 실패하였습니다.\n연결 재시도 바랍니다.'
       : isScanComplete
       ? '다음 단계로 이동해주세요.'
       : '잠시만 기다려주세요.';
@@ -58,6 +59,15 @@ const BottomSheetBluetoothConnectView: React.FC<
       ? '재시도 하기'
       : '다음';
 
+  const buttonColor =
+    connectionStatus === 'success'
+      ? '#371B9E'
+      : connectionStatus === 'fail'
+      ? '#371B9E'
+      : isScanComplete
+      ? '#371B9E' // 파란색 (스캔 완료)
+      : '#C7C7E8'; // 회색 (스캔 중)
+
   useEffect(() => {
     // 3초 후 스캔 완료 상태로 변경
     const timer = setTimeout(() => {
@@ -73,7 +83,6 @@ const BottomSheetBluetoothConnectView: React.FC<
 
     if (!device) {
       setConnectionStatus('fail'); // 기기를 찾을 수 없으면 실패 상태로 설정
-      Alert.alert('기기 연결 실패', 'ZAM DREAM 기기를 찾을 수 없습니다.');
       return;
     }
 
@@ -84,12 +93,9 @@ const BottomSheetBluetoothConnectView: React.FC<
 
       setConnectionStatus('success'); // 연결 성공 상태로 설정
       setConnectedDeviceId(device.id); // 연결된 기기의 ID 저장
-
-      Alert.alert('연결 성공', `${device.name} 기기와 연결되었습니다.`);
     } catch (error) {
       console.error('연결 중 오류:', error);
       setConnectionStatus('fail'); // 연결 실패 상태로 설정
-      Alert.alert('기기 연결 실패', 'ZAM DREAM 기기와 연결할 수 없습니다.');
     } finally {
       setIsConnecting(false);
     }
@@ -102,9 +108,12 @@ const BottomSheetBluetoothConnectView: React.FC<
       navigation.navigate('DetailDevice', {deviceId: connectedDeviceId});
     } else if (connectionStatus === 'fail') {
       // 연결 실패 시 다시 연결 시도
-      await connectToDevice();
+      console.log('연결 재시도 중...');
+      ReDeviceScan(); // 연결 실패 시 다시 BLE 기기 탐색 시작
+      setConnectionStatus(null); // 연결 상태 초기화
     } else if (isScanComplete && !connectionStatus) {
-      // 스캔 완료 후 아직 연결 시도하지 않은 경우
+      // 스캔 완료 후 연결 시도
+      console.log('처음 연결 시도 중...');
       await connectToDevice();
     } else {
       console.log('아직 준비가 완료되지 않았습니다.');
@@ -136,11 +145,8 @@ const BottomSheetBluetoothConnectView: React.FC<
       />
 
       <ConfirmButton
-        title={'다음'}
-        buttonStyle={[
-          styles.button,
-          {backgroundColor: isScanComplete ? '#371B9E' : '#C7C7E8'},
-        ]}
+        title={buttonText}
+        buttonStyle={[styles.button, {backgroundColor: buttonColor}]}
         textStyle={styles.buttonText}
         onSubmit={handleConfirmButtonPress}
       />
