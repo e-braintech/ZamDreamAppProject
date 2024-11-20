@@ -25,15 +25,13 @@ const BluetoothModal: React.FC<BluetoothModalProps> = ({
   // Logic
   const buttonText = Platform.OS === 'ios' ? '설정' : '블루투스 켜기';
 
-  const handleBluetoothState = () => {
+  const handleBluetoothState = async () => {
     if (Platform.OS === 'ios') {
       // iOS에서는 설정 페이지로 이동
-      onRequestClose();
       Linking.openURL('app-settings://bluetooth/RedreamApp'); // iOS 설정 페이지로 이동
     } else {
       // Android에서는 BLEService로 블루투스를 켤 수 있음
-      BLEService.enable();
-      onRequestClose();
+      await BLEService.enable();
     }
   };
 

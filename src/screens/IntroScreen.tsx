@@ -4,93 +4,26 @@ import {
   BottomSheetModalProvider,
   BottomSheetView,
 } from '@gorhom/bottom-sheet';
-import React, {useCallback, useMemo, useRef, useState} from 'react';
+import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {
+  AppState,
+  AppStateStatus,
   ImageBackground,
   Platform,
   SafeAreaView,
   StyleSheet,
   View,
 } from 'react-native';
-import {BleManager} from 'react-native-ble-plx';
-import {PERMISSIONS, requestMultiple, RESULTS} from 'react-native-permissions';
+import {Device, State} from 'react-native-ble-plx';
 import {NativeStackScreenProps} from 'react-native-screens/lib/typescript/native-stack/types';
 import IntroLottie from '../components/animation/IntroLottie';
 import BluetoothModal from '../components/BluetoothModal';
 import BottomSheetBluetoothConnectView from '../components/BottomSheetBluetoothConnectView';
 import ConfirmButton from '../components/ConfirmButton';
 import {useBottomSheetBackHandler} from '../hooks/useBottomSheetBackHandler';
+import {BLEService} from '../services/BLEService';
 
 type Props = NativeStackScreenProps<ROOT_NAVIGATION, 'Intro'>;
-
-// 권한 설정 확인하는 함수
-export async function requestPermissions(
-  bleManager: BleManager,
-  setIsModalVisible: React.Dispatch<React.SetStateAction<boolean>>,
-  presentBottomSheet: () => void,
-) {
-  if (Platform.OS === 'ios') {
-    // iOS에서 요청할 권한 목록을 배열에 추가
-    const permissions = [
-      PERMISSIONS.IOS.BLUETOOTH,
-      PERMISSIONS.IOS.LOCATION_WHEN_IN_USE,
-    ];
-
-    // requestMultiple을 사용하여 권한 요청
-    const statuses = await requestMultiple(permissions);
-
-    // 각 권한의 요청 결과를 확인
-    if (
-      statuses[PERMISSIONS.IOS.BLUETOOTH] === RESULTS.GRANTED &&
-      statuses[PERMISSIONS.IOS.LOCATION_WHEN_IN_USE] === RESULTS.GRANTED
-    ) {
-      console.log('iOS BLE 및 위치 권한 허용됨');
-      checkBluetoothState(bleManager, setIsModalVisible, presentBottomSheet);
-    } else {
-      console.log('iOS 권한 거부됨');
-    }
-  } else if (Platform.OS === 'android') {
-    // Android에서 요청할 권한 목록을 배열에 추가
-    const permissions = [
-      PERMISSIONS.ANDROID.BLUETOOTH_SCAN,
-      PERMISSIONS.ANDROID.BLUETOOTH_CONNECT,
-      PERMISSIONS.ANDROID.ACCESS_FINE_LOCATION,
-    ];
-
-    // requestMultiple을 사용하여 권한 요청
-    const statuses = await requestMultiple(permissions);
-
-    // 각 권한의 요청 결과를 확인
-    if (
-      statuses[PERMISSIONS.ANDROID.BLUETOOTH_SCAN] === RESULTS.GRANTED &&
-      statuses[PERMISSIONS.ANDROID.BLUETOOTH_CONNECT] === RESULTS.GRANTED &&
-      statuses[PERMISSIONS.ANDROID.ACCESS_FINE_LOCATION] === RESULTS.GRANTED
-    ) {
-      console.log('Android BLE 및 위치 권한 허용됨');
-      checkBluetoothState(bleManager, setIsModalVisible, presentBottomSheet);
-    } else {
-      console.log('Android 권한 거부됨');
-    }
-  }
-}
-
-// 블루투스 상태 확인 함수
-async function checkBluetoothState(
-  bleManager: BleManager,
-  setIsModalVisible: React.Dispatch<React.SetStateAction<boolean>>,
-  presentBottomSheet: () => void,
-) {
-  const state = await bleManager.state(); // BLE 상태 가져오기
-
-  if (state !== 'PoweredOn') {
-    console.log('블루투스가 꺼져 있습니다.');
-    setIsModalVisible(true); // 모달 표시
-  } else {
-    console.log('블루투스가 켜져 있습니다.');
-    setIsModalVisible(false);
-    presentBottomSheet();
-  }
-}
 
 const IntroScreen = ({navigation}: Props) => {
   // Logic
@@ -99,32 +32,111 @@ const IntroScreen = ({navigation}: Props) => {
       ? require('../assets/intro_ios.png')
       : require('../assets/intro_android.png');
 
-  const bleManager = new BleManager();
-
-  const [isModalVisible, setIsModalVisible] = useState(false); // Modal 상태
+  const [bluetoothState, setBluetoothState] = useState<string | null>(null); // 블루투스 활성화 여부를 감지하는 상태
+  const [isModalVisible, setIsModalVisible] = useState(false); // BluetoothModal 상태
+  const [appState, setAppState] = useState<AppStateStatus>(
+    AppState.currentState,
+  ); // 앱 상태 저장
+  const [devices, setDevices] = useState<Device[]>([]); // BLE 기기 저장
+  const [isScanning, setIsScanning] = useState(false); // 스캔 상태
 
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
 
   const snapPoints = useMemo(() => ['85%'], []);
 
+  useEffect(() => {
+    // 블루투스 상태 확인 및 상태 변경 감지
+    const subscription = BLEService.manager.onStateChange(state => {
+      if (state === State.PoweredOn) {
+        setBluetoothState('on');
+      } else if (state === State.PoweredOff) {
+        setBluetoothState('off');
+      } else {
+        setBluetoothState(state);
+      }
+    }, true);
+
+    // AppState를 통해 앱 상태 변경 감지
+    const appStateSubscription = AppState.addEventListener(
+      'change',
+      handleAppStateChange,
+    );
+
+    return () => {
+      subscription.remove(); // 컴포넌트 언마운트 시 상태 변경 감지 이벤트 해제
+      appStateSubscription.remove(); // 앱 상태 감지 해제
+    };
+  }, []);
+
+  // Android BottomSheet 백 핸들러 이벤트
   const {handleSheetPositionChange} =
     useBottomSheetBackHandler(bottomSheetModalRef);
 
+  // BottomSheet present 모드 일 때, BackScreen 터치 시 BottomSheet close 변경 이벤트
   const renderBackdrop = useCallback(
     (props: any) => <BottomSheetBackdrop {...props} pressBehavior="close" />,
     [],
   );
 
-  const presentBottomSheet = () => {
-    bottomSheetModalRef.current?.present();
-  };
-
+  // Modal 닫는 이벤트
   const closeModal = () => {
     setIsModalVisible(false);
   };
 
-  const handleRequestPermissions = async () => {
-    await requestPermissions(bleManager, setIsModalVisible, presentBottomSheet);
+  // Bluetooth 상태 확인 및 Modal or BottomSheet 동작 처리
+  const handleBluetoothState = async () => {
+    const state = await BLEService.manager.state();
+    if (state === 'PoweredOn') {
+      // Bluetooth가 켜져 있을 경우 BottomSheet 표시
+      bottomSheetModalRef.current?.present();
+      startDeviceScan();
+    } else {
+      // Bluetooth가 꺼져 있을 경우 Modal 표시
+      setIsModalVisible(true);
+    }
+  };
+
+  // 앱 상태가 변경될 때 호출되는 함수
+  const handleAppStateChange = (nextAppState: AppStateStatus) => {
+    console.log('Current app state: ', nextAppState); // 현재 상태 로그 출력
+
+    if (appState.match(/inactive|background/) && nextAppState === 'active') {
+      console.log('App has come to the foreground');
+      BLEService.manager.state().then(bluetoothState => {
+        if (bluetoothState === State.PoweredOn) {
+          console.log('Bluetooth is powered on');
+        } else {
+          console.log('Bluetooth is not powered on');
+          setBluetoothState('off');
+        }
+      });
+    }
+    setAppState(nextAppState); // 상태 업데이트
+  };
+
+  // 블루투스 장치 스캔 함수 (3초 후 스캔 중지)
+  const startDeviceScan = () => {
+    if (isScanning) return; // 이미 스캔 중이면 중복 실행 방지
+    setIsScanning(true);
+    setDevices([]); // 기존 기기 목록 초기화
+
+    BLEService.scanDevices(device => {
+      if (device.name) {
+        console.log(device.name);
+        setDevices(prevDevices => {
+          const exists = prevDevices.some(d => d.id === device.id);
+          if (!exists) {
+            return [...prevDevices, device];
+          }
+          return prevDevices;
+        });
+      }
+    });
+
+    setTimeout(() => {
+      BLEService.manager.stopDeviceScan();
+      setIsScanning(false);
+    }, 3000); // 3초 후 스캔 종료
   };
 
   // View
@@ -141,7 +153,7 @@ const IntroScreen = ({navigation}: Props) => {
               title="시작하기"
               buttonStyle={styles.button}
               textStyle={styles.buttonText}
-              onSubmit={handleRequestPermissions}
+              onSubmit={handleBluetoothState}
             />
           </View>
 
@@ -154,7 +166,10 @@ const IntroScreen = ({navigation}: Props) => {
             onChange={handleSheetPositionChange}
             handleStyle={{backgroundColor: '#F3F1FF', borderRadius: 50}}>
             <BottomSheetView style={{flex: 1}}>
-              <BottomSheetBluetoothConnectView navigation={navigation} />
+              <BottomSheetBluetoothConnectView
+                navigation={navigation}
+                devices={devices}
+              />
             </BottomSheetView>
           </BottomSheetModal>
         </ImageBackground>
