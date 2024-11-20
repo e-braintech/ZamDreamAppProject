@@ -415,7 +415,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 32,
   },
   mainTitle: {
-    marginTop: 136,
+    marginTop: 100,
     textAlign: 'center',
     fontSize: 30,
     fontWeight: 'bold',
@@ -439,7 +439,9 @@ const styles = StyleSheet.create({
   },
   pillowImage: {
     maxWidth: '100%',
-    maxHeight: '50%',
+    maxHeight: '30%',
+    marginTop: 64,
+    marginBottom: 40,
   },
 
   section1: {
