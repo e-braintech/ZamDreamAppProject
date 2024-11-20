@@ -75,6 +75,13 @@ const DetailDeviceScreen = ({navigation}: Props) => {
 
   const snapPoints = useMemo(() => ['20%', '50%'], []);
 
+  const batteryImage =
+    batteryLevel === 100
+      ? require('../assets/battery100.png')
+      : batteryLevel === 50
+      ? require('../assets/battery50.png')
+      : require('../assets/battery30.png');
+
   const {handleSheetPositionChange} =
     useBottomSheetBackHandler(bottomSheetModalRef);
 
@@ -278,8 +285,9 @@ const DetailDeviceScreen = ({navigation}: Props) => {
           }
 
           if (characteristic?.value) {
+            console.log(characteristic.value);
             const decodedValue = decodeFromBase64(characteristic.value);
-            const targetCharValue = decodedValue[4];
+            const targetCharValue = decodedValue[3];
             const decimalValue = charToDecimal(targetCharValue);
             console.log(`Battery Data: ${decimalValue}`);
             setBatteryLevel(decimalValue);
@@ -309,7 +317,7 @@ const DetailDeviceScreen = ({navigation}: Props) => {
           <Text style={styles.mainTitle}>나의 베개 설정</Text>
           <View style={styles.batteryContainer}>
             <Image
-              source={require('../assets/battery100.png')}
+              source={batteryImage}
               style={styles.batteryImage}
               resizeMode="contain"
             />

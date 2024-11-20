@@ -1,3 +1,4 @@
+import {BottomSheetModalMethods} from '@gorhom/bottom-sheet/lib/typescript/types';
 import LottieView from 'lottie-react-native';
 import React, {useEffect, useState} from 'react';
 import {StyleSheet, Text, View} from 'react-native';
@@ -9,11 +10,12 @@ import ConfirmButton from './ConfirmButton';
 interface BottomSheetBluetoothConnectViewProps {
   navigation: NativeStackNavigationProp<ROOT_NAVIGATION, 'Intro'>;
   devices: Device[]; // IntroScreen에서 전달받은 BLE 기기 목록
+  bottomSheetModalRef: React.RefObject<BottomSheetModalMethods>;
 }
 
 const BottomSheetBluetoothConnectView: React.FC<
   BottomSheetBluetoothConnectViewProps
-> = ({navigation, devices}) => {
+> = ({navigation, devices, bottomSheetModalRef}) => {
   // Logic
   const [isScanComplete, setIsScanComplete] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false); // 연결 상태 관리
@@ -78,7 +80,7 @@ const BottomSheetBluetoothConnectView: React.FC<
 
   // "ZAM DREAM" 기기와 연결하는 함수
   const connectToDevice = async () => {
-    const device = devices.find(device => device.name === 'ZAM DREAM');
+    const device = devices.find(device => device.name === 'ZAMDREAM');
 
     if (!device) {
       setConnectionStatus('fail'); // 기기를 찾을 수 없으면 실패 상태로 설정
@@ -104,6 +106,7 @@ const BottomSheetBluetoothConnectView: React.FC<
   const handleButtonPress = async () => {
     if (connectionStatus === 'success' && connectedDeviceId) {
       // 연결 성공 시 상세 화면으로 이동
+      bottomSheetModalRef.current?.close();
       navigation.navigate('DetailDevice', {deviceId: connectedDeviceId});
     } else if (connectionStatus === 'fail') {
       // 연결 실패 시 다시 연결 시도

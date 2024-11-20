@@ -1,5 +1,5 @@
 // 배터리 상태 표시 요청 값
-export const batteryValue: string = 'PA3710';
+export const batteryValue: string = 'PBB';
 
 /*
 *-------------------------------------------------------------------*
