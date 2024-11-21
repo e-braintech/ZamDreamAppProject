@@ -1,48 +1,82 @@
-import React, {useEffect, useState} from 'react';
+import {
+  BottomSheetBackdrop,
+  BottomSheetModal,
+  BottomSheetModalProvider,
+  BottomSheetView,
+} from '@gorhom/bottom-sheet';
+import LottieView from 'lottie-react-native';
+import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {
   AppState,
   AppStateStatus,
-  FlatList,
-  Linking,
+  ImageBackground,
   Platform,
   Pressable,
-  RefreshControl,
   SafeAreaView,
   Text,
+  View,
 } from 'react-native';
 import {Device, State} from 'react-native-ble-plx';
 import {NativeStackScreenProps} from 'react-native-screens/lib/typescript/native-stack/types';
-import Toast from 'react-native-toast-message';
-import BluetoothRenderItem from '../components/BluetoothRenderItem';
+import BluetoothModal from '../components/BluetoothModal';
+import BottomSheetBluetoothConnectView from '../components/BottomSheetBluetoothConnectView';
+import {useBottomSheetBackHandler} from '../hooks/useBottomSheetBackHandler';
+import {handleAppStateChange, startDeviceScan} from '../services';
 import {BLEService} from '../services/BLEService';
 
 type Props = NativeStackScreenProps<ROOT_NAVIGATION, 'ScanDevice'>;
 
 const ScanDeviceScreen = ({navigation}: Props) => {
   // Logic
+  const source =
+    Platform.OS === 'ios'
+      ? require('../assets/intro_ios.png')
+      : require('../assets/intro_android.png');
+
   const [bluetoothState, setBluetoothState] = useState<string | null>(null); // 블루투스 활성화 여부를 감지하는 상태
-  const [devices, setDevices] = useState<Device[]>([]); // 스캔된 BLE 기기들을 저장하는 상태, Device[] 타입으로 정의
-  const [isScanning, setIsScanning] = useState<boolean>(false); // 스캔 중 여부를 저장하는 상태
-  const [scanFinished, setScanFinished] = useState<boolean>(false); // 스캔이 끝났는지 여부를 저장하는 상태
-  const [refreshing, setRefreshing] = useState<boolean>(false); // RefreshControl 상태
-  const [connectedDevice, setConnectedDevice] = useState<Device | null>(null); // 연결된 기기 상태
+  const [isModalVisible, setIsModalVisible] = useState(false); // BluetoothModal 상태
   const [appState, setAppState] = useState<AppStateStatus>(
     AppState.currentState,
   ); // 앱 상태 저장
+  const [devices, setDevices] = useState<Device[]>([]); // BLE 기기 저장
+  const [isScanning, setIsScanning] = useState(false); // 스캔 상태
+
+  const bottomSheetModalRef = useRef<BottomSheetModal>(null);
+
+  const snapPoints = useMemo(() => ['85%'], []);
+
+  const closeModal = () => {
+    setIsModalVisible(false);
+  };
+
+  const renderBackdrop = useCallback(
+    (props: any) => <BottomSheetBackdrop {...props} pressBehavior="close" />,
+    [],
+  );
+
+  const {handleSheetPositionChange} =
+    useBottomSheetBackHandler(bottomSheetModalRef);
+
+  // Bluetooth 상태 확인 및 Modal or BottomSheet 동작 처리
+  const handleBluetoothState = async () => {
+    const state = await BLEService.manager.state();
+    if (state === 'PoweredOn') {
+      // Bluetooth가 켜져 있을 경우 BottomSheet 표시
+      bottomSheetModalRef.current?.present();
+      startDeviceScan(isScanning, setIsScanning, setDevices);
+    } else {
+      // Bluetooth가 꺼져 있을 경우 Modal 표시
+      setIsModalVisible(true);
+    }
+  };
 
   useEffect(() => {
     // 블루투스 상태 확인 및 상태 변경 감지
     const subscription = BLEService.manager.onStateChange(state => {
       if (state === State.PoweredOn) {
         setBluetoothState('on');
-        startDeviceScan(); // 블루투스가 켜져 있으면 기기 스캔 시작
       } else if (state === State.PoweredOff) {
         setBluetoothState('off');
-        Toast.show({
-          type: 'error',
-          text1: 'Bluetooth is OFF',
-          text2: 'Please turn on Bluetooth in settings.',
-        });
       } else {
         setBluetoothState(state);
       }
@@ -51,269 +85,81 @@ const ScanDeviceScreen = ({navigation}: Props) => {
     // AppState를 통해 앱 상태 변경 감지
     const appStateSubscription = AppState.addEventListener(
       'change',
-      handleAppStateChange,
+      nextAppState => {
+        handleAppStateChange(
+          appState,
+          nextAppState,
+          setAppState,
+          setBluetoothState,
+        );
+      },
     );
 
     return () => {
       subscription.remove(); // 컴포넌트 언마운트 시 상태 변경 감지 이벤트 해제
       appStateSubscription.remove(); // 앱 상태 감지 해제
-      BLEService.manager.stopDeviceScan(); // 컴포넌트가 언마운트될 때 스캔 종료
     };
   }, []);
 
-  // 앱 상태가 변경될 때 호출되는 함수
-  const handleAppStateChange = (nextAppState: AppStateStatus) => {
-    console.log('Current app state: ', nextAppState); // 현재 상태 로그 출력
-
-    if (appState.match(/inactive|background/) && nextAppState === 'active') {
-      console.log('App has come to the foreground');
-      BLEService.manager.state().then(bluetoothState => {
-        if (bluetoothState === State.PoweredOn) {
-          startDeviceScan(); // Bluetooth가 켜져 있을 때만 스캔 재시작
-        } else {
-          console.log('Bluetooth is not powered on');
-          setBluetoothState('off');
-        }
-      });
-    } else if (nextAppState === 'background' || nextAppState === 'inactive') {
-      console.log('App has gone to the background or is inactive');
-      if (connectedDevice) {
-        disconnectFromDevice(connectedDevice);
-      }
-      setDevices([]);
-    }
-    setAppState(nextAppState); // 상태 업데이트
-  };
-
-  // 장치 리스트를 RSSI 값 기준으로 정렬
-  const addOrUpdateDevice = (newDevice: Device) => {
-    setDevices(prevDevices => {
-      const existingDeviceIndex = prevDevices.findIndex(
-        d => d.id === newDevice.id,
-      );
-      const updatedDevices =
-        existingDeviceIndex >= 0
-          ? [
-              ...prevDevices.slice(0, existingDeviceIndex),
-              newDevice,
-              ...prevDevices.slice(existingDeviceIndex + 1),
-            ]
-          : [...prevDevices, newDevice];
-
-      return updatedDevices.sort((a, b) => (b.rssi || -100) - (a.rssi || -100)); // RSSI 기준 정렬
-    });
-  };
-
-  // 블루투스 장치 스캔 함수 (3초 후 스캔 중지)
-  const startDeviceScan = () => {
-    if (isScanning) return; // 이미 스캔 중이면 중복 실행 방지
-    setIsScanning(true);
-    setScanFinished(false); // 스캔이 진행중임을 표시
-    setDevices([]); // 기존 스캔된 기기 목록 초기화
-
-    BLEService.scanDevices(device => {
-      if (device.name) {
-        addOrUpdateDevice(device); // 장치 추가 및 정렬
-      }
-    });
-
-    // 3초 후 스캔 중지 및 버튼 표시 변경
-    setTimeout(() => {
-      BLEService.manager.stopDeviceScan();
-      setIsScanning(false);
-      setScanFinished(true); // 스캔이 끝났음을 표시
-      // console.log('Scan stopped after 3 seconds');
-    }, 3000);
-  };
-
-  // 블루투스를 켜는 함수 (iOS에서는 설정 페이지로 유도)
-  const enableBluetooth = () => {
-    if (Platform.OS === 'ios') {
-      // iOS에서는 설정 페이지로 이동
-      Linking.openURL('app-settings://bluetooth/RedreamApp'); // iOS 설정 페이지로 이동
-    } else {
-      // Android에서는 BLEService로 블루투스를 켤 수 있음
-      BLEService.enable()
-        .then(() => {
-          setBluetoothState('on'); // 블루투스가 켜지면 상태 업데이트
-          Toast.show({
-            type: 'success',
-            text1: 'Bluetooth is ON',
-            text2: 'Bluetooth has been enabled.',
-          });
-        })
-        .catch(error => {
-          console.error('Failed to turn on Bluetooth:', error);
-          Toast.show({
-            type: 'error',
-            text1: 'Error',
-            text2: 'Failed to enable Bluetooth.',
-          });
-        });
-    }
-  };
-
-  // 기기와 연결된 후 서비스 및 특성 UUID를 로그로 출력하는 함수
-  const logDeviceServicesAndCharacteristics = async (device: Device) => {
-    try {
-      // 모든 서비스를 가져옵니다
-      const services = await BLEService.manager.servicesForDevice(device.id);
-
-      for (const service of services) {
-        // console.log(`Service UUID: ${service.uuid}`);
-
-        // 각 서비스에 대해 특성을 가져옵니다
-        const characteristics =
-          await BLEService.manager.characteristicsForDevice(
-            device.id,
-            service.uuid,
-          );
-
-        // 각 특성 UUID를 로그로 출력
-        characteristics.forEach(characteristic => {
-          // console.log(`Characteristic UUID: ${characteristic.uuid}`);
-        });
-      }
-    } catch (error) {
-      console.error('Failed to discover services and characteristics:', error);
-    }
-  };
-
-  // 블루투스 기기와 연결하는 함수
-  const connectToDevice = (device: Device) => {
-    BLEService.manager
-      .connectToDevice(device.id)
-      .then(() =>
-        BLEService.manager.discoverAllServicesAndCharacteristicsForDevice(
-          device.id,
-        ),
-      )
-      .then(device => {
-        // console.log(JSON.stringify(device, null, 5));
-        setConnectedDevice(device);
-        Toast.show({
-          type: 'success',
-          text1: 'Connected',
-          text2: `Connected to ${device.name}`,
-        });
-
-        // 서비스와 특성 UUID 로그 출력
-        logDeviceServicesAndCharacteristics(device);
-
-        navigation.navigate('DetailDevice', {
-          deviceId: device.id,
-        });
-      })
-      .catch(error => {
-        // console.log(JSON.stringify(error, null, 5));
-        Toast.show({
-          type: 'error',
-          text1: 'Connection Failed',
-          text2: `Failed to connect to ${device.name}`,
-        });
-      });
-  };
-
-  // 블루투스 기기와 연결을 끊는 함수
-  const disconnectFromDevice = (device: Device) => {
-    return BLEService.manager
-      .cancelDeviceConnection(device.id)
-      .then(() => {
-        setConnectedDevice(null); // 연결 해제 시 연결된 기기 상태 초기화
-        Toast.show({
-          type: 'success',
-          text1: 'Disconnected',
-          text2: `Disconnected from ${device.name}`,
-        });
-        // console.log('Device disconnected:', JSON.stringify(device, null, 5));
-      })
-      .catch(error => {
-        console.log('Failed to disconnect device:', error);
-        Toast.show({
-          type: 'error',
-          text1: 'Disconnection Failed',
-          text2: `Failed to disconnect from ${device.name}`,
-        });
-      });
-  };
-
-  // 스캔 버튼 클릭 시 처리: 연결된 기기 해제 후 스캔
-  const handleRestartScan = () => {
-    if (connectedDevice) {
-      disconnectFromDevice(connectedDevice).then(() => {
-        startDeviceScan(); // 연결 해제 후 스캔 시작
-      });
-    } else {
-      startDeviceScan(); // 연결된 기기가 없으면 바로 스캔 시작
-    }
-  };
-
-  // RefreshControl에서 스캔 재시작
-  const onRefresh = () => {
-    setRefreshing(true);
-    startDeviceScan();
-    setTimeout(() => {
-      setRefreshing(false); // 3초 후 RefreshControl 종료
-    }, 3000);
-  };
-
   return (
-    <SafeAreaView style={{flex: 1, backgroundColor: 'white'}}>
-      {bluetoothState === 'on' ? (
-        <>
-          {!scanFinished ? (
-            <Text style={{textAlign: 'center', marginBottom: 50}}>
-              디바이스 스캔 중...
-            </Text>
-          ) : (
+    <BottomSheetModalProvider>
+      <SafeAreaView style={{flex: 1, backgroundColor: 'transparent'}}>
+        <ImageBackground
+          source={source}
+          style={{
+            flex: 1,
+            justifyContent: 'space-between',
+            paddingHorizontal: 32,
+          }}>
+          <LottieView
+            source={require('../assets/lottie/intro.json')}
+            style={{
+              width: Platform.OS === 'ios' ? 240 : 216,
+              height: Platform.OS === 'ios' ? 156 : 140,
+              marginTop: Platform.OS === 'ios' ? 100 : 120,
+            }}
+            autoPlay={true}
+            loop={false}
+          />
+
+          <View style={{marginBottom: 50}}>
             <Pressable
               style={{
+                width: '100%',
                 justifyContent: 'center',
                 alignItems: 'center',
-                marginBottom: 50,
-                backgroundColor: 'blue',
-                height: 50,
+                paddingVertical: 16,
+                backgroundColor: '#FBFBFF',
+                borderRadius: 30,
               }}
-              onPress={handleRestartScan}>
-              <Text style={{color: 'white'}}>스캔</Text>
+              onPress={handleBluetoothState}>
+              <Text
+                style={{fontSize: 20, fontWeight: 'bold', color: '#240843'}}>
+                시작하기
+              </Text>
             </Pressable>
-          )}
-          <FlatList
-            data={devices}
-            keyExtractor={item => item.id}
-            renderItem={({item, index}) => (
-              <BluetoothRenderItem
-                device={item}
-                index={index}
-                connectToDevice={connectToDevice}
-                disconnectFromDevice={disconnectFromDevice}
-                isConnected={connectedDevice?.id === item.id}
+          </View>
+
+          <BottomSheetModal
+            ref={bottomSheetModalRef}
+            index={1}
+            snapPoints={snapPoints}
+            enablePanDownToClose={true}
+            backdropComponent={renderBackdrop}
+            onChange={handleSheetPositionChange}
+            handleStyle={{backgroundColor: '#F3F1FF', borderRadius: 50}}>
+            <BottomSheetView>
+              <BottomSheetBluetoothConnectView
+                navigation={navigation}
+                devices={devices}
+                bottomSheetModalRef={bottomSheetModalRef}
               />
-            )}
-            refreshControl={
-              <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-            }
-          />
-        </>
-      ) : (
-        <>
-          {Platform.OS === 'ios' ? (
-            <Pressable
-              onPress={enableBluetooth} // iOS에서는 설정으로 이동
-            >
-              <Text>블루투스 켜기</Text>
-            </Pressable>
-          ) : (
-            <Pressable
-              onPress={enableBluetooth} // Android에서는 블루투스를 켤 수 있음
-            >
-              <Text>블루투스 켜기</Text>
-            </Pressable>
-          )}
-        </>
-      )}
-      <Toast position="bottom" />
-    </SafeAreaView>
+            </BottomSheetView>
+          </BottomSheetModal>
+        </ImageBackground>
+        <BluetoothModal visible={isModalVisible} onRequestClose={closeModal} />
+      </SafeAreaView>
+    </BottomSheetModalProvider>
   );
 };
 

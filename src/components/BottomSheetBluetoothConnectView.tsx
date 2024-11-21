@@ -1,14 +1,13 @@
 import {BottomSheetModalMethods} from '@gorhom/bottom-sheet/lib/typescript/types';
 import LottieView from 'lottie-react-native';
 import React, {useEffect, useState} from 'react';
-import {StyleSheet, Text, View} from 'react-native';
+import {Platform, Pressable, StyleSheet, Text, View} from 'react-native';
 import {Device} from 'react-native-ble-plx';
 import {NativeStackNavigationProp} from 'react-native-screens/lib/typescript/native-stack/types';
-import {BLEService} from '../services/BLEService';
-import ConfirmButton from './ConfirmButton';
+import {connectToDevice} from '../services';
 
 interface BottomSheetBluetoothConnectViewProps {
-  navigation: NativeStackNavigationProp<ROOT_NAVIGATION, 'Intro'>;
+  navigation: NativeStackNavigationProp<ROOT_NAVIGATION, 'ScanDevice'>;
   devices: Device[]; // IntroScreen에서 전달받은 BLE 기기 목록
   bottomSheetModalRef: React.RefObject<BottomSheetModalMethods>;
 }
@@ -78,36 +77,12 @@ const BottomSheetBluetoothConnectView: React.FC<
     return () => clearTimeout(timer); // 컴포넌트 언마운트 시 타이머 해제
   }, []);
 
-  // "ZAM DREAM" 기기와 연결하는 함수
-  const connectToDevice = async () => {
-    const device = devices.find(device => device.name === 'ZAMDREAM');
-
-    if (!device) {
-      setConnectionStatus('fail'); // 기기를 찾을 수 없으면 실패 상태로 설정
-      return;
-    }
-
-    try {
-      setIsConnecting(true);
-      await BLEService.connectToDevice(device.id);
-      await BLEService.discoverAllServicesAndCharacteristicsForDevice();
-
-      setConnectionStatus('success'); // 연결 성공 상태로 설정
-      setConnectedDeviceId(device.id); // 연결된 기기의 ID 저장
-    } catch (error) {
-      console.error('연결 중 오류:', error);
-      setConnectionStatus('fail'); // 연결 실패 상태로 설정
-    } finally {
-      setIsConnecting(false);
-    }
-  };
-
   // ConfirmButton 클릭 이벤트
   const handleButtonPress = async () => {
     if (connectionStatus === 'success' && connectedDeviceId) {
       // 연결 성공 시 상세 화면으로 이동
       bottomSheetModalRef.current?.close();
-      navigation.navigate('DetailDevice', {deviceId: connectedDeviceId});
+      navigation.navigate('ControlDevice', {deviceID: connectedDeviceId});
     } else if (connectionStatus === 'fail') {
       // 연결 실패 시 다시 연결 시도
       console.log('연결 재시도 중...');
@@ -115,7 +90,12 @@ const BottomSheetBluetoothConnectView: React.FC<
     } else if (isScanComplete && !connectionStatus) {
       // 스캔 완료 후 연결 시도
       console.log('처음 연결 시도 중...');
-      await connectToDevice();
+      await connectToDevice(
+        devices,
+        setConnectionStatus,
+        setIsConnecting,
+        setConnectedDeviceId,
+      );
     } else {
       console.log('아직 준비가 완료되지 않았습니다.');
     }
@@ -132,25 +112,56 @@ const BottomSheetBluetoothConnectView: React.FC<
 
   // View
   return (
-    <View style={styles.container}>
-      {/* 상태에 따라 다른 텍스트 렌더링 */}
-      <Text style={styles.mainTitle}>{mainTitle}</Text>
-      <Text style={styles.subTitle}>{subTitle}</Text>
+    <View
+      style={{
+        flex: 1,
+        alignItems: 'center',
+        paddingHorizontal: 32,
+        backgroundColor: '#F3F1FF',
+      }}>
+      <Text
+        style={{
+          textAlign: 'center',
+          fontSize: 30,
+          fontWeight: 'bold',
+          color: '#240843',
+          marginTop: Platform.OS === 'ios' ? 86 : 102,
+        }}>
+        {mainTitle}
+      </Text>
+      <Text
+        style={{
+          textAlign: 'center',
+          fontSize: 18,
+          color: '#8F8C94',
+          marginTop: 24,
+        }}>
+        {subTitle}
+      </Text>
 
-      {/* 상태에 따라 다른 Lottie 애니메이션 렌더링 */}
       <LottieView
         source={source}
-        style={styles.lottie}
+        style={{width: '100%', height: '30%'}}
         autoPlay={true}
         loop={true}
       />
 
-      <ConfirmButton
-        title={buttonText}
-        buttonStyle={[styles.button, {backgroundColor: buttonColor}]}
-        textStyle={styles.buttonText}
-        onSubmit={handleConfirmButtonPress}
-      />
+      <View style={{marginBottom: 50}}>
+        <Pressable
+          style={{
+            width: '100%',
+            justifyContent: 'center',
+            alignItems: 'center',
+            paddingVertical: 16,
+            backgroundColor: '#FBFBFF',
+            borderRadius: 30,
+          }}
+          onPress={handleConfirmButtonPress}>
+          <Text style={{fontSize: 20, fontWeight: 'bold', color: '#240843'}}>
+            {buttonText}
+          </Text>
+        </Pressable>
+      </View>
     </View>
   );
 };

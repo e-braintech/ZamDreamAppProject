@@ -1,26 +1,6 @@
-import {BottomSheetModalMethods} from '@gorhom/bottom-sheet/lib/typescript/types';
 import {AppStateStatus} from 'react-native';
 import {Device, State} from 'react-native-ble-plx';
 import {BLEService} from './BLEService';
-
-// Bluetooth 상태 확인 및 Modal or BottomSheet 동작 처리
-export const handleBluetoothState = async (
-  bottomSheetModalRef: React.RefObject<BottomSheetModalMethods>,
-  isScanning: boolean,
-  setIsScanning: React.Dispatch<React.SetStateAction<boolean>>,
-  setDevices: React.Dispatch<React.SetStateAction<Device[]>>,
-  setIsModalVisible: (value: React.SetStateAction<boolean>) => void,
-) => {
-  const state = await BLEService.manager.state();
-  if (state === 'PoweredOn') {
-    // Bluetooth가 켜져 있을 경우 BottomSheet 표시
-    bottomSheetModalRef.current?.present();
-    startDeviceScan(isScanning, setIsScanning, setDevices);
-  } else {
-    // Bluetooth가 꺼져 있을 경우 Modal 표시
-    setIsModalVisible(true);
-  }
-};
 
 // 앱 상태가 변경될 때 호출되는 함수
 export const handleAppStateChange = (
@@ -72,4 +52,35 @@ export const startDeviceScan = (
     BLEService.manager.stopDeviceScan();
     setIsScanning(false);
   }, 3000); // 3초 후 스캔 종료
+};
+
+// "ZAMDREAM" 기기와 연결하는 함수
+export const connectToDevice = async (
+  devices: Device[],
+  setConnectionStatus: (
+    value: React.SetStateAction<'fail' | 'success' | null>,
+  ) => void,
+  setIsConnecting: (value: React.SetStateAction<boolean>) => void,
+  setConnectedDeviceId: (value: React.SetStateAction<string | null>) => void,
+) => {
+  const device = devices.find(device => device.name === 'ZAMDREAM');
+
+  if (!device) {
+    setConnectionStatus('fail'); // 기기를 찾을 수 없으면 실패 상태로 설정
+    return;
+  }
+
+  try {
+    setIsConnecting(true);
+    await BLEService.connectToDevice(device.id);
+    await BLEService.discoverAllServicesAndCharacteristicsForDevice();
+
+    setConnectionStatus('success'); // 연결 성공 상태로 설정
+    setConnectedDeviceId(device.id); // 연결된 기기의 ID 저장
+  } catch (error) {
+    console.error('연결 중 오류:', error);
+    setConnectionStatus('fail'); // 연결 실패 상태로 설정
+  } finally {
+    setIsConnecting(false);
+  }
 };
