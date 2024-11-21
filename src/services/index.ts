@@ -61,7 +61,7 @@ export const connectToDevice = async (
     value: React.SetStateAction<'fail' | 'success' | null>,
   ) => void,
   setIsConnecting: (value: React.SetStateAction<boolean>) => void,
-  setConnectedDeviceId: (value: React.SetStateAction<string | null>) => void,
+  setConnectedDeviceID: (value: React.SetStateAction<string | null>) => void,
 ) => {
   const device = devices.find(device => device.name === 'ZAMDREAM');
 
@@ -76,7 +76,7 @@ export const connectToDevice = async (
     await BLEService.discoverAllServicesAndCharacteristicsForDevice();
 
     setConnectionStatus('success'); // 연결 성공 상태로 설정
-    setConnectedDeviceId(device.id); // 연결된 기기의 ID 저장
+    setConnectedDeviceID(device.id); // 연결된 기기의 ID 저장
   } catch (error) {
     console.error('연결 중 오류:', error);
     setConnectionStatus('fail'); // 연결 실패 상태로 설정
