@@ -18,8 +18,8 @@ import {
 } from 'react-native';
 import {Device, State} from 'react-native-ble-plx';
 import {NativeStackScreenProps} from 'react-native-screens/lib/typescript/native-stack/types';
-import BluetoothModal from '../components/BluetoothModal';
-import BottomSheetBluetoothConnectView from '../components/BottomSheetBluetoothConnectView';
+import BluetoothConnectBottomSheet from '../components/BluetoothConnectBottomSheet';
+import BluetoothConnectModal from '../components/BluetoothConnectModal';
 import {useBottomSheetBackHandler} from '../hooks/useBottomSheetBackHandler';
 import {handleAppStateChange, startDeviceScan} from '../services';
 import {BLEService} from '../services/BLEService';
@@ -45,7 +45,7 @@ const ScanDeviceScreen = ({navigation}: Props) => {
 
   const snapPoints = useMemo(() => ['85%'], []);
 
-  const closeModal = () => {
+  const handleCloseModal = () => {
     setIsModalVisible(false);
   };
 
@@ -112,7 +112,7 @@ const ScanDeviceScreen = ({navigation}: Props) => {
             paddingHorizontal: 32,
           }}>
           <LottieView
-            source={require('../assets/lottie/intro.json')}
+            source={require('../assets/lottie/BI.json')}
             style={{
               width: Platform.OS === 'ios' ? 240 : 216,
               height: Platform.OS === 'ios' ? 156 : 140,
@@ -147,9 +147,15 @@ const ScanDeviceScreen = ({navigation}: Props) => {
             enablePanDownToClose={true}
             backdropComponent={renderBackdrop}
             onChange={handleSheetPositionChange}
-            handleStyle={{backgroundColor: '#F3F1FF', borderRadius: 50}}>
-            <BottomSheetView>
-              <BottomSheetBluetoothConnectView
+            handleStyle={{backgroundColor: '#F3F1FF', borderRadius: 50}}
+            handleIndicatorStyle={{
+              width: 100,
+              height: 5,
+              marginTop: 10,
+              backgroundColor: '#C7C7E8',
+            }}>
+            <BottomSheetView style={{flex: 1}}>
+              <BluetoothConnectBottomSheet
                 navigation={navigation}
                 devices={devices}
                 bottomSheetModalRef={bottomSheetModalRef}
@@ -157,7 +163,10 @@ const ScanDeviceScreen = ({navigation}: Props) => {
             </BottomSheetView>
           </BottomSheetModal>
         </ImageBackground>
-        <BluetoothModal visible={isModalVisible} onRequestClose={closeModal} />
+        <BluetoothConnectModal
+          visible={isModalVisible}
+          onClose={handleCloseModal}
+        />
       </SafeAreaView>
     </BottomSheetModalProvider>
   );
