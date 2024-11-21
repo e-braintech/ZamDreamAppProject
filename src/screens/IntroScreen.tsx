@@ -114,31 +114,6 @@ const IntroScreen = ({navigation}: Props) => {
     setAppState(nextAppState); // 상태 업데이트
   };
 
-  // 블루투스 장치 스캔 함수 (3초 후 스캔 중지)
-  const startDeviceScan = () => {
-    if (isScanning) return; // 이미 스캔 중이면 중복 실행 방지
-    setIsScanning(true);
-    setDevices([]); // 기존 기기 목록 초기화
-
-    BLEService.scanDevices(device => {
-      if (device.name) {
-        console.log(device.name);
-        setDevices(prevDevices => {
-          const exists = prevDevices.some(d => d.id === device.id);
-          if (!exists) {
-            return [...prevDevices, device];
-          }
-          return prevDevices;
-        });
-      }
-    });
-
-    setTimeout(() => {
-      BLEService.manager.stopDeviceScan();
-      setIsScanning(false);
-    }, 3000); // 3초 후 스캔 종료
-  };
-
   // View
   return (
     <BottomSheetModalProvider>
