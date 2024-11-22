@@ -1,5 +1,12 @@
 import React, {useEffect, useState} from 'react';
-import {Text, View} from 'react-native';
+import {
+  Image,
+  Platform,
+  Pressable,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import {
   head_step_1,
   head_step_2,
@@ -51,7 +58,31 @@ const BluetoothControlBottomSheet: React.FC<
   const {shoulder, neck, head, rightHead, leftHead, smell, setStep} =
     useStepStore();
 
+  // 이미지 맵 정의
+  const imageMap: {
+    h: {[key: number]: any}; // stepNumber가 1~5일 때의 이미지 맵
+    s: {[key: number]: any}; // stepNumber가 6일 때의 이미지 맵
+  } = {
+    h: {
+      1: require('../assets/h01.png'),
+      2: require('../assets/h02.png'),
+      3: require('../assets/h03.png'),
+      4: require('../assets/h04.png'),
+      5: require('../assets/h05.png'),
+    },
+    s: {
+      2: require('../assets/s01.png'),
+      3: require('../assets/s02.png'),
+      4: require('../assets/s03.png'),
+    },
+  };
+
   const [stepLevel, setStepLevel] = useState<number>(1); // 단계 수 상태 추가
+
+  // 이미지 경로 동적으로 설정
+  const getImageSource = (): number => {
+    return stepNumber === 6 ? imageMap.s[stepLevel] : imageMap.h[stepLevel];
+  };
 
   // 단계 수 증가 함수
   const handleIncrease = () => {
@@ -238,8 +269,138 @@ const BluetoothControlBottomSheet: React.FC<
 
   // View
   return (
-    <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
-      <Text></Text>
+    <View
+      style={{
+        flex: 1,
+        alignItems: 'center',
+        paddingHorizontal: 32,
+        backgroundColor: '#F3F1FF',
+      }}>
+      <View
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          marginTop: 50,
+        }}>
+        <Text
+          style={{
+            fontSize: 18,
+            fontWeight: 'semibold',
+            color: '#8F8C94',
+            marginRight: 5,
+          }}>
+          조작 위치
+        </Text>
+
+        <View
+          style={{
+            width: 20,
+            height: 20,
+            justifyContent: 'center',
+            alignItems: 'center',
+            borderRadius: 10,
+            backgroundColor: '#8F8C94',
+          }}>
+          <Text
+            style={{fontSize: 14, fontWeight: 'semibold', color: '#ffffff'}}>
+            {stepNumber}
+          </Text>
+        </View>
+      </View>
+
+      <Text
+        style={{
+          fontSize: 30,
+          fontWeight: 'bold',
+          marginTop: 15,
+          marginBottom: 24,
+        }}>
+        {title}
+      </Text>
+
+      <Text
+        style={{
+          fontSize: 16,
+          fontWeight: 'bold',
+          textAlign: 'center',
+          marginBottom: 25,
+        }}>
+        {`${stepLevel}단`}
+      </Text>
+
+      <View
+        style={{
+          flexDirection: 'row',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          // gap: 16,
+        }}>
+        <TouchableOpacity onPress={handleDecrease}>
+          <Image
+            source={require('../assets/arw_down.png')}
+            style={{width: 36, height: 36}}
+            resizeMode="contain"
+          />
+        </TouchableOpacity>
+
+        <Image
+          source={getImageSource()}
+          style={{
+            width: Platform.OS === 'ios' ? 240 : 228,
+            height: Platform.OS === 'ios' ? 88 : 84,
+            paddingHorizontal: 16,
+          }}
+          resizeMode="contain"
+        />
+
+        <TouchableOpacity onPress={handleIncrease}>
+          <Image
+            source={require('../assets/arw_up.png')}
+            style={{width: 36, height: 36}}
+            resizeMode="contain"
+          />
+        </TouchableOpacity>
+      </View>
+
+      <View
+        style={{
+          flexDirection: 'row',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          marginTop: 80,
+          gap: 10,
+        }}>
+        <Pressable
+          style={{
+            flex: 1,
+            width: '100%',
+            justifyContent: 'center',
+            alignItems: 'center',
+            paddingVertical: 16,
+            backgroundColor: '#C7C7E8',
+            borderRadius: 30,
+          }}>
+          <Text style={{fontSize: 20, fontWeight: 'bold', color: '#ffffff'}}>
+            취소
+          </Text>
+        </Pressable>
+
+        <Pressable
+          style={{
+            flex: 1,
+            width: '100%',
+            justifyContent: 'center',
+            alignItems: 'center',
+            paddingVertical: 16,
+            backgroundColor: '#371B9E',
+            borderRadius: 30,
+            // marginLeft: 10,
+          }}>
+          <Text style={{fontSize: 20, fontWeight: 'bold', color: '#ffffff'}}>
+            저장
+          </Text>
+        </Pressable>
+      </View>
     </View>
   );
 };

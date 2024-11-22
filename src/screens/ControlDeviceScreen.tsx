@@ -63,7 +63,7 @@ const ControlDeviceScreen = () => {
 
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
 
-  const snapPoints = useMemo(() => ['20%', '50%'], []);
+  const snapPoints = useMemo(() => ['20%', '60%'], []);
 
   const batteryImage =
     batteryLevel === 100
@@ -599,11 +599,18 @@ const ControlDeviceScreen = () => {
 
             <BottomSheetModal
               ref={bottomSheetModalRef}
-              index={1}
+              index={2}
               snapPoints={snapPoints}
               enablePanDownToClose={true}
               backdropComponent={renderBackdrop}
-              onChange={handleSheetPositionChange}>
+              onChange={handleSheetPositionChange}
+              handleStyle={{backgroundColor: '#F3F1FF', borderRadius: 50}}
+              handleIndicatorStyle={{
+                width: 100,
+                height: 5,
+                marginTop: 10,
+                backgroundColor: '#C7C7E8',
+              }}>
               <BottomSheetView style={{flex: 1}}>
                 {selectedStep && (
                   <BluetoothControlBottomSheet
