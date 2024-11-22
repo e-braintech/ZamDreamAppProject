@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import {NativeStackNavigationProp} from 'react-native-screens/lib/typescript/native-stack/types';
 import {
   head_step_1,
   head_step_2,
@@ -38,12 +39,14 @@ import {
   smell_step_3,
 } from '../data/actions';
 import {characteristic_UUID, service_UUID} from '../data/uuids';
+import {resetAndNavigateToScanScreen} from '../services';
 import {BLEService} from '../services/BLEService';
 import {encodeToBase64} from '../utils/common';
 import {loadStepLevel} from '../utils/storage/storage';
 import useStepStore from '../utils/zustand/store';
 
 interface BluetoothControlBottomSheetProps {
+  navigation: NativeStackNavigationProp<ROOT_NAVIGATION, 'ScanDevice'>;
   stepNumber: number;
   title: string;
   deviceID: string;
@@ -52,7 +55,7 @@ interface BluetoothControlBottomSheetProps {
 
 const BluetoothControlBottomSheet: React.FC<
   BluetoothControlBottomSheetProps
-> = ({stepNumber, title, deviceID, hideBottomSheet}) => {
+> = ({navigation, stepNumber, title, deviceID, hideBottomSheet}) => {
   // Logic
   const {shoulder, neck, head, rightHead, leftHead, smell, setStep} =
     useStepStore();
@@ -197,14 +200,22 @@ const BluetoothControlBottomSheet: React.FC<
   };
 
   // 데이터를 블루투스 기기로 보내는 함수
-  const sendDataToDevice = (data: string) => {
+  const sendDataToDevice = async (data: string) => {
     console.log(data);
 
     try {
       const base64Data = encodeToBase64(data);
 
       if (!deviceID) {
-        console.error('No connected device found');
+        console.log('No connected device found');
+        return;
+      }
+
+      // 연결 상태 확인
+      const isConnected = await BLEService.manager.isDeviceConnected(deviceID);
+      if (!isConnected) {
+        // console.log('Device is not connected. Resetting connection...');
+        resetAndNavigateToScanScreen(deviceID, navigation);
         return;
       }
 
@@ -220,19 +231,23 @@ const BluetoothControlBottomSheet: React.FC<
         })
         .catch(err => console.log('Error sending data:', err));
     } catch (error) {
-      console.error('Failed to send data:', error);
+      console.log('Failed to send data:', error);
+      resetAndNavigateToScanScreen(deviceID, navigation); // 오류 시 탐색 화면으로 이동
     }
   };
 
   // '확인' 버튼 클릭 시 데이터를 전송하는 함수
-  const handleConfirm = () => {
+  const handleConfirm = async () => {
     const data = getBluetoothData(stepNumber, stepLevel);
 
     try {
       if (data) {
-        sendDataToDevice(data);
-        const part = getPartName(stepNumber);
-        setStep(part, stepLevel); // 상태 저장
+        await sendDataToDevice(data)
+          .then(() => {
+            const part = getPartName(stepNumber);
+            setStep(part, stepLevel); // 상태 저장
+          })
+          .catch(err => console.log(err));
         hideBottomSheet();
       }
     } catch (error) {

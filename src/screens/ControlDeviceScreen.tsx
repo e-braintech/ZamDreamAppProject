@@ -8,6 +8,7 @@ import {RouteProp, useFocusEffect, useRoute} from '@react-navigation/native';
 import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {Image, Pressable, SafeAreaView, Text, View} from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
+import {NativeStackScreenProps} from 'react-native-screens/lib/typescript/native-stack/types';
 import BluetoothControlBottomSheet from '../components/BluetoothControlBottomSheet';
 import {
   batteryValue,
@@ -39,12 +40,15 @@ import {
 } from '../data/actions';
 import {characteristic_UUID, notify_UUID, service_UUID} from '../data/uuids';
 import {useBottomSheetBackHandler} from '../hooks/useBottomSheetBackHandler';
+import {resetAndNavigateToScanScreen} from '../services';
 import {BLEService} from '../services/BLEService';
 import {ActionStepType} from '../types/types';
 import {charToDecimal, decodeFromBase64, encodeToBase64} from '../utils/common';
 import {loadStepLevel} from '../utils/storage/storage';
 
-const ControlDeviceScreen = () => {
+type Props = NativeStackScreenProps<ROOT_NAVIGATION, 'ScanDevice'>;
+
+const ControlDeviceScreen = ({navigation}: Props) => {
   // Logic
 
   const actionStep: ActionStepType[] = [
@@ -170,7 +174,7 @@ const ControlDeviceScreen = () => {
       const base64Data = encodeToBase64(data);
 
       if (!deviceID) {
-        console.error('No connected device found');
+        console.log('No connected device found');
         return;
       }
 
@@ -192,7 +196,7 @@ const ControlDeviceScreen = () => {
           return;
         });
     } catch (error) {
-      console.error('Failed to send data:', error);
+      console.log('Failed to send data:', error);
     }
   };
 
@@ -200,14 +204,14 @@ const ControlDeviceScreen = () => {
   const requestBatteryLevel = async () => {
     try {
       if (!deviceID) {
-        console.error('No connected device found');
+        console.log('No connected device found');
         return;
       }
 
       // 연결 상태 확인 및 재연결
       const isConnected = await BLEService.manager.isDeviceConnected(deviceID);
       if (!isConnected) {
-        console.error('Device is not connected. Reconnecting...');
+        console.log('Device is not connected. Reconnecting...');
         await BLEService.manager.connectToDevice(deviceID);
       }
 
@@ -236,7 +240,8 @@ const ControlDeviceScreen = () => {
         notify_UUID, // 배터리 Notify 특성 UUID
         (error, characteristic) => {
           if (error) {
-            console.error('Failed to monitor characteristic:', error);
+            console.log('Failed to monitor characteristic:', error);
+            resetAndNavigateToScanScreen(deviceID, navigation);
             return;
           }
 
@@ -251,7 +256,7 @@ const ControlDeviceScreen = () => {
         },
       );
     } catch (error) {
-      console.error('Failed to request battery level:', error);
+      console.log('Failed to request battery level:', error);
     }
   };
 
@@ -586,6 +591,7 @@ const ControlDeviceScreen = () => {
                     title={selectedStep.title}
                     deviceID={deviceID}
                     hideBottomSheet={hideBottomSheet}
+                    navigation={navigation}
                   />
                 )}
               </BottomSheetView>

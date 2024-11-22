@@ -63,7 +63,7 @@ class BLEServiceInstance {
             subscription.remove();
             break;
           default:
-            console.error('Unsupported state: ', state);
+            console.log('Unsupported state: ', state);
           // resolve()
           // subscription.remove()
         }
@@ -117,7 +117,7 @@ class BLEServiceInstance {
         }
       })
       .then(() => {})
-      .catch(console.error);
+      .catch(console.log);
   };
 
   connectToDevice = (deviceId: DeviceId) =>
@@ -363,7 +363,7 @@ class BLEServiceInstance {
   };
 
   isDeviceWithIdConnected = (id: DeviceId) =>
-    this.manager.isDeviceConnected(id).catch(console.error);
+    this.manager.isDeviceConnected(id).catch(console.log);
 
   getConnectedDevices = (expectedServices: UUID[]) => {
     if (!this.device) {
