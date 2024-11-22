@@ -285,32 +285,33 @@ const ControlDeviceScreen = () => {
               }}>
               나의 베개 설정
             </Text>
-
-            <View
-              style={{
-                flexDirection: 'row',
-                justifyContent: 'center',
-                alignItems: 'center',
-                marginTop: 8,
-              }}>
-              <Image
-                source={batteryImage}
+            {batteryLevel && (
+              <View
                 style={{
-                  width: 24,
-                  height: 12,
-                  marginRight: 10,
-                }}
-                resizeMode="contain"
-              />
-              <Text
-                style={{
-                  fontSize: 16,
-                  fontWeight: 'regular',
-                  color: '#ffffff',
+                  flexDirection: 'row',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  marginTop: 8,
                 }}>
-                {batteryLevel}%
-              </Text>
-            </View>
+                <Image
+                  source={batteryImage}
+                  style={{
+                    width: 24,
+                    height: 12,
+                    marginRight: 10,
+                  }}
+                  resizeMode="contain"
+                />
+                <Text
+                  style={{
+                    fontSize: 16,
+                    fontWeight: 'regular',
+                    color: '#ffffff',
+                  }}>
+                  {batteryLevel}%
+                </Text>
+              </View>
+            )}
 
             <Image
               source={require('../assets/pilow.png')}
