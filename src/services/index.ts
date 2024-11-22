@@ -84,3 +84,36 @@ export const connectToDevice = async (
     setIsConnecting(false);
   }
 };
+
+export const checkDeviceConnection = async (deviceID: string) => {
+  const isConnected = await BLEService.manager.isDeviceConnected(deviceID);
+  if (!isConnected) {
+    console.error('Device is not connected. Attempting to reconnect...');
+    await BLEService.manager.connectToDevice(deviceID);
+    await discoverServicesAndCharacteristics(deviceID);
+  }
+};
+
+export const discoverServicesAndCharacteristics = async (deviceID: string) => {
+  try {
+    await BLEService.manager.discoverAllServicesAndCharacteristicsForDevice(
+      deviceID,
+    );
+
+    const services = await BLEService.manager.servicesForDevice(deviceID);
+    console.log('Discovered services:', services);
+
+    for (const service of services) {
+      const characteristics = await BLEService.manager.characteristicsForDevice(
+        deviceID,
+        service.uuid,
+      );
+      console.log(
+        `Service ${service.uuid} has characteristics:`,
+        characteristics,
+      );
+    }
+  } catch (error) {
+    console.error('Failed to discover services and characteristics:', error);
+  }
+};

@@ -149,40 +149,6 @@ const ControlDeviceScreen = () => {
     }
   };
 
-  const discoverServicesAndCharacteristics = async (deviceID: string) => {
-    try {
-      await BLEService.manager.discoverAllServicesAndCharacteristicsForDevice(
-        deviceID,
-      );
-
-      const services = await BLEService.manager.servicesForDevice(deviceID);
-      console.log('Discovered services:', services);
-
-      for (const service of services) {
-        const characteristics =
-          await BLEService.manager.characteristicsForDevice(
-            deviceID,
-            service.uuid,
-          );
-        console.log(
-          `Service ${service.uuid} has characteristics:`,
-          characteristics,
-        );
-      }
-    } catch (error) {
-      console.error('Failed to discover services and characteristics:', error);
-    }
-  };
-
-  const checkDeviceConnection = async (deviceId: string) => {
-    const isConnected = await BLEService.manager.isDeviceConnected(deviceId);
-    if (!isConnected) {
-      console.error('Device is not connected. Attempting to reconnect...');
-      await BLEService.manager.connectToDevice(deviceId);
-      await discoverServicesAndCharacteristics(deviceId);
-    }
-  };
-
   const sendStoredStepsToDevice = async () => {
     const parts = ['shoulder', 'neck', 'head', 'rightHead', 'leftHead'];
 
@@ -275,6 +241,7 @@ const ControlDeviceScreen = () => {
           }
 
           if (characteristic?.value) {
+            console.log(characteristic.value);
             const decodedValue = decodeFromBase64(characteristic.value);
             const targetCharValue = decodedValue[3];
             const decimalValue = charToDecimal(targetCharValue);

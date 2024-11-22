@@ -36,7 +36,6 @@ import {
   smell_step_1,
   smell_step_2,
   smell_step_3,
-  smell_turn_off,
 } from '../data/actions';
 import {characteristic_UUID, service_UUID} from '../data/uuids';
 import {BLEService} from '../services/BLEService';
@@ -58,6 +57,8 @@ const BluetoothControlBottomSheet: React.FC<
   const {shoulder, neck, head, rightHead, leftHead, smell, setStep} =
     useStepStore();
 
+  const [stepLevel, setStepLevel] = useState<number>(1); // 단계 수 상태 추가
+
   // 이미지 맵 정의
   const imageMap: {
     h: {[key: number]: any}; // stepNumber가 1~5일 때의 이미지 맵
@@ -71,13 +72,11 @@ const BluetoothControlBottomSheet: React.FC<
       5: require('../assets/h05.png'),
     },
     s: {
-      2: require('../assets/s01.png'),
-      3: require('../assets/s02.png'),
-      4: require('../assets/s03.png'),
+      1: require('../assets/s01.png'),
+      2: require('../assets/s02.png'),
+      3: require('../assets/s03.png'),
     },
   };
-
-  const [stepLevel, setStepLevel] = useState<number>(1); // 단계 수 상태 추가
 
   // 이미지 경로 동적으로 설정
   const getImageSource = (): number => {
@@ -88,7 +87,7 @@ const BluetoothControlBottomSheet: React.FC<
   const handleIncrease = () => {
     setStepLevel(prev => {
       if (stepNumber === 6) {
-        return prev < 4 ? prev + 1 : prev; // stepNumber가 6일 때 3까지만 증가
+        return prev < 3 ? prev + 1 : prev; // stepNumber가 6일 때 3까지만 증가
       } else {
         return prev < 5 ? prev + 1 : prev; // 다른 경우는 5까지만 증가
       }
@@ -164,14 +163,14 @@ const BluetoothControlBottomSheet: React.FC<
           : left_head_step_5;
       case 6:
         return stepLevel === 1
-          ? smell_turn_off
-          : stepLevel === 2
           ? smell_step_1
-          : stepLevel === 3
+          : stepLevel === 2
           ? smell_step_2
-          : stepLevel === 4
+          : stepLevel === 3
           ? smell_step_3
-          : null; // 잘못된 stepLevel에 대해 null 반환
+          : // : stepLevel === 4
+            // ? smell_turn_off
+            null; // 잘못된 stepLevel에 대해 null 반환
       default:
         return null;
     }
@@ -379,7 +378,8 @@ const BluetoothControlBottomSheet: React.FC<
             paddingVertical: 16,
             backgroundColor: '#C7C7E8',
             borderRadius: 30,
-          }}>
+          }}
+          onPress={hideBottomSheet}>
           <Text style={{fontSize: 20, fontWeight: 'bold', color: '#ffffff'}}>
             취소
           </Text>
@@ -394,8 +394,8 @@ const BluetoothControlBottomSheet: React.FC<
             paddingVertical: 16,
             backgroundColor: '#371B9E',
             borderRadius: 30,
-            // marginLeft: 10,
-          }}>
+          }}
+          onPress={handleConfirm}>
           <Text style={{fontSize: 20, fontWeight: 'bold', color: '#ffffff'}}>
             저장
           </Text>
