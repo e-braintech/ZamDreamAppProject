@@ -130,6 +130,7 @@ const BluetoothConnectBottomSheet: React.FC<
           fontWeight: 'semibold',
           color: '#8F8C94',
           marginTop: 24,
+          lineHeight: 18 * 1.5,
         }}>
         {subTitle}
       </Text>
