@@ -322,7 +322,7 @@ const BluetoothControlBottomSheet: React.FC<
           fontSize: 16,
           fontWeight: 'bold',
           textAlign: 'center',
-          marginBottom: 25,
+          marginBottom: 15,
         }}>
         {`${stepLevel}단`}
       </Text>
@@ -332,7 +332,7 @@ const BluetoothControlBottomSheet: React.FC<
           flexDirection: 'row',
           justifyContent: 'space-between',
           alignItems: 'center',
-          // gap: 16,
+          columnGap: 16,
         }}>
         <TouchableOpacity onPress={handleDecrease}>
           <Image
@@ -345,9 +345,9 @@ const BluetoothControlBottomSheet: React.FC<
         <Image
           source={getImageSource()}
           style={{
+            flex: 1,
             width: Platform.OS === 'ios' ? 240 : 228,
             height: Platform.OS === 'ios' ? 88 : 84,
-            paddingHorizontal: 16,
           }}
           resizeMode="contain"
         />
