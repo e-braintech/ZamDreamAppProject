@@ -6,7 +6,15 @@ import {
 } from '@gorhom/bottom-sheet';
 import {RouteProp, useFocusEffect, useRoute} from '@react-navigation/native';
 import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
-import {Image, Pressable, SafeAreaView, Text, View} from 'react-native';
+import {
+  Image,
+  Platform,
+  Pressable,
+  SafeAreaView,
+  Switch,
+  Text,
+  View,
+} from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import {NativeStackScreenProps} from 'react-native-screens/lib/typescript/native-stack/types';
 import BluetoothControlBottomSheet from '../components/BluetoothControlBottomSheet';
@@ -38,6 +46,7 @@ import {
   set_shoulder_step_3,
   set_shoulder_step_4,
   set_shoulder_step_5,
+  smell_turn_off,
 } from '../data/actions';
 import {characteristic_UUID, notify_UUID, service_UUID} from '../data/uuids';
 import {useBottomSheetBackHandler} from '../hooks/useBottomSheetBackHandler';
@@ -45,6 +54,7 @@ import {BLEService} from '../services/BLEService';
 import {ActionStepType} from '../types/types';
 import {charToDecimal, decodeFromBase64, encodeToBase64} from '../utils/common';
 import {loadStepLevel} from '../utils/storage/storage';
+import {useSwitchStore} from '../utils/zustand/store';
 
 type Props = NativeStackScreenProps<ROOT_NAVIGATION, 'ScanDevice'>;
 
@@ -69,6 +79,8 @@ const ControlDeviceScreen = ({navigation}: Props) => {
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
 
   const snapPoints = useMemo(() => ['20%', '60%'], []);
+
+  const {isEnabled, setEnabled} = useSwitchStore();
 
   const batteryImage =
     batteryLevel === 100
@@ -99,6 +111,10 @@ const ControlDeviceScreen = ({navigation}: Props) => {
 
   const hideBottomSheet = () => {
     bottomSheetModalRef.current?.close();
+  };
+
+  const toggleSwitch = () => {
+    setEnabled(!isEnabled);
   };
 
   const getBluetoothData = (part: string, stepLevel: number): string | null => {
@@ -299,6 +315,40 @@ const ControlDeviceScreen = ({navigation}: Props) => {
     }
   };
 
+  const sendFanTurnOff = async () => {
+    const data = encodeToBase64(smell_turn_off);
+
+    try {
+      if (!deviceID) {
+        console.log('No connected device found');
+        return;
+      }
+
+      const isConnected = await BLEService.manager.isDeviceConnected(deviceID);
+      if (!isConnected) {
+        console.log('Device is not connected. Reconnecting...');
+        await BLEService.manager.connectToDevice(deviceID);
+      }
+
+      await BLEService.manager.writeCharacteristicWithResponseForDevice(
+        deviceID,
+        service_UUID,
+        characteristic_UUID,
+        data,
+      );
+
+      console.log('Smell turn off value sent to server');
+    } catch (error) {
+      console.log('Failed to send smell turn off value:', error);
+    }
+  };
+
+  useEffect(() => {
+    if (!isEnabled) {
+      sendFanTurnOff();
+    }
+  }, [isEnabled]);
+
   useEffect(() => {
     sendStoredStepsToDevice();
   }, []);
@@ -329,39 +379,37 @@ const ControlDeviceScreen = ({navigation}: Props) => {
               }}>
               나의 베개 설정
             </Text>
-            {batteryLevel && (
-              <View
+            <View
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'center',
+                alignItems: 'center',
+                marginTop: 8,
+              }}>
+              <Image
+                source={batteryImage}
                 style={{
-                  flexDirection: 'row',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  marginTop: 8,
+                  width: 24,
+                  height: 12,
+                  marginRight: 10,
+                }}
+                resizeMode="contain"
+              />
+              <Text
+                style={{
+                  fontSize: 16,
+                  fontWeight: 'regular',
+                  color: '#ffffff',
                 }}>
-                <Image
-                  source={batteryImage}
-                  style={{
-                    width: 24,
-                    height: 12,
-                    marginRight: 10,
-                  }}
-                  resizeMode="contain"
-                />
-                <Text
-                  style={{
-                    fontSize: 16,
-                    fontWeight: 'regular',
-                    color: '#ffffff',
-                  }}>
-                  {batteryLevel}%
-                </Text>
-              </View>
-            )}
+                {batteryLevel}%
+              </Text>
+            </View>
 
             <Image
               source={require('../assets/pilow.png')}
               style={{
                 maxWidth: '100%',
-                maxHeight: '50%',
+                maxHeight: '40%',
               }}
               resizeMode="contain"
             />
@@ -493,6 +541,7 @@ const ControlDeviceScreen = ({navigation}: Props) => {
                 flexDirection: 'row',
                 justifyContent: 'space-between',
                 alignItems: 'center',
+                marginBottom: Platform.OS === 'ios' ? 20 : 30,
               }}>
               <Pressable
                 style={{
@@ -607,6 +656,28 @@ const ControlDeviceScreen = ({navigation}: Props) => {
                   {actionStep[5].title}
                 </Text>
               </Pressable>
+            </View>
+
+            <View
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                height: 56,
+                paddingHorizontal: 16,
+                backgroundColor: '#F3F1FF',
+                borderRadius: 10,
+                opacity: isEnabled ? 1 : 0.1,
+              }}>
+              <Text
+                style={{fontSize: 18, fontWeight: 'bold', color: '#240843'}}>
+                향기 박스
+              </Text>
+              <Switch
+                value={isEnabled}
+                onValueChange={toggleSwitch}
+                disabled={!isEnabled}
+              />
             </View>
 
             <BottomSheetModal

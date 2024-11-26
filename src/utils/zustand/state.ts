@@ -7,3 +7,9 @@ export interface PillowStepState {
   smell: boolean;
   setStep: (part: string, level: number) => void;
 }
+
+export interface SwitchState {
+  isEnabled: boolean;
+  toggleSwitch: () => void;
+  setEnabled: (enabled: boolean) => void;
+}

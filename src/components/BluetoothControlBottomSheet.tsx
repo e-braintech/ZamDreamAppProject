@@ -42,7 +42,7 @@ import {characteristic_UUID, service_UUID} from '../data/uuids';
 import {BLEService} from '../services/BLEService';
 import {encodeToBase64} from '../utils/common';
 import {loadStepLevel} from '../utils/storage/storage';
-import useStepStore from '../utils/zustand/store';
+import {useStepStore, useSwitchStore} from '../utils/zustand/store';
 
 interface BluetoothControlBottomSheetProps {
   navigation: NativeStackNavigationProp<ROOT_NAVIGATION, 'ScanDevice'>;
@@ -60,6 +60,8 @@ const BluetoothControlBottomSheet: React.FC<
     useStepStore();
 
   const [stepLevel, setStepLevel] = useState<number>(1); // 단계 수 상태 추가
+
+  const {setEnabled} = useSwitchStore();
 
   // 이미지 맵 정의
   const imageMap: {
@@ -238,6 +240,10 @@ const BluetoothControlBottomSheet: React.FC<
   // '확인' 버튼 클릭 시 데이터를 전송하는 함수
   const handleConfirm = async () => {
     const data = getBluetoothData(stepNumber, stepLevel);
+
+    if (stepNumber === 6 && stepLevel >= 1 && stepLevel <= 3) {
+      setEnabled(true); // 조건이 맞으면 `isEnabled`를 true로 변경
+    }
 
     try {
       if (data) {
