@@ -6,15 +6,7 @@ import {
 } from '@gorhom/bottom-sheet';
 import {RouteProp, useFocusEffect, useRoute} from '@react-navigation/native';
 import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
-import {
-  Image,
-  Platform,
-  Pressable,
-  SafeAreaView,
-  Switch,
-  Text,
-  View,
-} from 'react-native';
+import {Image, Pressable, SafeAreaView, Switch, Text, View} from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import {NativeStackScreenProps} from 'react-native-screens/lib/typescript/native-stack/types';
 import BluetoothControlBottomSheet from '../components/BluetoothControlBottomSheet';
@@ -379,31 +371,34 @@ const ControlDeviceScreen = ({navigation}: Props) => {
               }}>
               나의 베개 설정
             </Text>
-            <View
-              style={{
-                flexDirection: 'row',
-                justifyContent: 'center',
-                alignItems: 'center',
-                marginTop: 8,
-              }}>
-              <Image
-                source={batteryImage}
+
+            {batteryLevel && (
+              <View
                 style={{
-                  width: 24,
-                  height: 12,
-                  marginRight: 10,
-                }}
-                resizeMode="contain"
-              />
-              <Text
-                style={{
-                  fontSize: 16,
-                  fontWeight: 'regular',
-                  color: '#ffffff',
+                  flexDirection: 'row',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  marginTop: 8,
                 }}>
-                {batteryLevel}%
-              </Text>
-            </View>
+                <Image
+                  source={batteryImage}
+                  style={{
+                    width: 24,
+                    height: 12,
+                    marginRight: 10,
+                  }}
+                  resizeMode="contain"
+                />
+                <Text
+                  style={{
+                    fontSize: 16,
+                    fontWeight: 'regular',
+                    color: '#ffffff',
+                  }}>
+                  {batteryLevel}%
+                </Text>
+              </View>
+            )}
 
             <Image
               source={require('../assets/pilow.png')}
@@ -541,7 +536,7 @@ const ControlDeviceScreen = ({navigation}: Props) => {
                 flexDirection: 'row',
                 justifyContent: 'space-between',
                 alignItems: 'center',
-                marginBottom: Platform.OS === 'ios' ? 20 : 30,
+                marginBottom: 20,
               }}>
               <Pressable
                 style={{
@@ -667,7 +662,7 @@ const ControlDeviceScreen = ({navigation}: Props) => {
                 paddingHorizontal: 16,
                 backgroundColor: '#F3F1FF',
                 borderRadius: 10,
-                opacity: isEnabled ? 1 : 0.1,
+                opacity: isEnabled ? 1 : 0.5,
               }}>
               <Text
                 style={{fontSize: 18, fontWeight: 'bold', color: '#240843'}}>
@@ -677,6 +672,8 @@ const ControlDeviceScreen = ({navigation}: Props) => {
                 value={isEnabled}
                 onValueChange={toggleSwitch}
                 disabled={!isEnabled}
+                thumbColor={'#ffffff'}
+                trackColor={{true: '#371B9E', false: '#C7C7E8'}}
               />
             </View>
 
