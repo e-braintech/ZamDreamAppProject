@@ -39,7 +39,6 @@ import {
   smell_step_3,
 } from '../data/actions';
 import {characteristic_UUID, service_UUID} from '../data/uuids';
-import {resetAndNavigateToScanScreen} from '../services';
 import {BLEService} from '../services/BLEService';
 import {encodeToBase64} from '../utils/common';
 import {loadStepLevel} from '../utils/storage/storage';
@@ -215,7 +214,7 @@ const BluetoothControlBottomSheet: React.FC<
       const isConnected = await BLEService.manager.isDeviceConnected(deviceID);
       if (!isConnected) {
         // console.log('Device is not connected. Resetting connection...');
-        resetAndNavigateToScanScreen(deviceID, navigation);
+        // resetAndNavigateToScanScreen(deviceID, navigation);
         return;
       }
 
@@ -232,7 +231,7 @@ const BluetoothControlBottomSheet: React.FC<
         .catch(err => console.log('Error sending data:', err));
     } catch (error) {
       console.log('Failed to send data:', error);
-      resetAndNavigateToScanScreen(deviceID, navigation); // 오류 시 탐색 화면으로 이동
+      // resetAndNavigateToScanScreen(deviceID, navigation); // 오류 시 탐색 화면으로 이동
     }
   };
 

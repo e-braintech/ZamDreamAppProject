@@ -10,6 +10,7 @@ import {Image, Pressable, SafeAreaView, Text, View} from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import {NativeStackScreenProps} from 'react-native-screens/lib/typescript/native-stack/types';
 import BluetoothControlBottomSheet from '../components/BluetoothControlBottomSheet';
+import BluetoothDisconnectModal from '../components/BluetoothDisconnectModal';
 import {
   batteryValue,
   set_head_step_1,
@@ -40,7 +41,6 @@ import {
 } from '../data/actions';
 import {characteristic_UUID, notify_UUID, service_UUID} from '../data/uuids';
 import {useBottomSheetBackHandler} from '../hooks/useBottomSheetBackHandler';
-import {resetAndNavigateToScanScreen} from '../services';
 import {BLEService} from '../services/BLEService';
 import {ActionStepType} from '../types/types';
 import {charToDecimal, decodeFromBase64, encodeToBase64} from '../utils/common';
@@ -64,6 +64,7 @@ const ControlDeviceScreen = ({navigation}: Props) => {
   const {deviceID} = route.params; // 전달받은 기기 데이터
   const [selectedStep, setSelectedStep] = useState<ActionStepType | null>(null);
   const [batteryLevel, setBatteryLevel] = useState<number | null>(null); // 배터리 레벨을 저장하는 상태
+  const [modalVisible, setIsModalVisible] = useState<boolean>(false);
 
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
 
@@ -75,6 +76,10 @@ const ControlDeviceScreen = ({navigation}: Props) => {
       : batteryLevel === 50
       ? require('../assets/battery50.png')
       : require('../assets/battery30.png');
+
+  const handleCloseModal = () => {
+    setIsModalVisible(false);
+  };
 
   const {handleSheetPositionChange} =
     useBottomSheetBackHandler(bottomSheetModalRef);
@@ -153,6 +158,21 @@ const ControlDeviceScreen = ({navigation}: Props) => {
     }
   };
 
+  const handleBluetoothReconnect = async () => {
+    await BLEService.manager
+      .cancelDeviceConnection(deviceID)
+      .then(() => {
+        console.log('Connection reset successfully');
+        setIsModalVisible(false);
+        navigation.navigate('ScanDevice');
+      })
+      .catch(error => {
+        console.log('Failed to reset connection:', error);
+        setIsModalVisible(false);
+        navigation.navigate('ScanDevice');
+      });
+  };
+
   const sendStoredStepsToDevice = async () => {
     const parts = ['shoulder', 'neck', 'head', 'rightHead', 'leftHead'];
 
@@ -167,7 +187,11 @@ const ControlDeviceScreen = ({navigation}: Props) => {
   };
 
   // 데이터를 블루투스 기기로 보내는 함수
-  const sendDataToDevice = (data: string, part: string, stepLevel: number) => {
+  const sendDataToDevice = async (
+    data: string,
+    part: string,
+    stepLevel: number,
+  ) => {
     console.log(data);
 
     try {
@@ -175,7 +199,18 @@ const ControlDeviceScreen = ({navigation}: Props) => {
 
       if (!deviceID) {
         console.log('No connected device found');
+        setIsModalVisible(!modalVisible);
         return;
+      }
+
+      // 연결 상태 확인
+      const isConnected = await BLEService.manager.isDeviceConnected(deviceID);
+      if (!isConnected) {
+        console.log('Device is not connected. Reconnecting...');
+        await BLEService.manager.connectToDevice(deviceID).catch(() => {
+          setIsModalVisible(!modalVisible);
+          return;
+        });
       }
 
       BLEService.manager
@@ -212,7 +247,10 @@ const ControlDeviceScreen = ({navigation}: Props) => {
       const isConnected = await BLEService.manager.isDeviceConnected(deviceID);
       if (!isConnected) {
         console.log('Device is not connected. Reconnecting...');
-        await BLEService.manager.connectToDevice(deviceID);
+        await BLEService.manager.connectToDevice(deviceID).catch(() => {
+          setIsModalVisible(!modalVisible);
+          return;
+        });
       }
 
       // 서비스 및 특성 검색
@@ -241,7 +279,8 @@ const ControlDeviceScreen = ({navigation}: Props) => {
         (error, characteristic) => {
           if (error) {
             console.log('Failed to monitor characteristic:', error);
-            resetAndNavigateToScanScreen(deviceID, navigation);
+            setIsModalVisible(true);
+            // resetAndNavigateToScanScreen(deviceID, navigation);
             return;
           }
 
@@ -590,12 +629,18 @@ const ControlDeviceScreen = ({navigation}: Props) => {
                     stepNumber={selectedStep.number}
                     title={selectedStep.title}
                     deviceID={deviceID}
-                    hideBottomSheet={hideBottomSheet}
                     navigation={navigation}
+                    hideBottomSheet={hideBottomSheet}
                   />
                 )}
               </BottomSheetView>
             </BottomSheetModal>
+
+            <BluetoothDisconnectModal
+              visible={modalVisible}
+              onClose={handleCloseModal}
+              handleReconnect={handleBluetoothReconnect}
+            />
           </View>
         </SafeAreaView>
       </LinearGradient>
