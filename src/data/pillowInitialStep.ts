@@ -1,4 +1,6 @@
-const pillowInitialStep = {
+import pillowInitialStepType from '../types/pillowInitalStepType';
+
+const pillowInitialStep: pillowInitialStepType = {
   shoulder: {
     1: 'PTAA',
     2: 'PTAB',

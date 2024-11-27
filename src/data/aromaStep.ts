@@ -1,4 +1,6 @@
-const aromaStep = {
+import aromaStepType from '../types/AromaStepType';
+
+const aromaStep: aromaStepType = {
   turn_on: {
     1: 'PAFB',
     2: 'PAFC',

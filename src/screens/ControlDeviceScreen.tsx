@@ -17,7 +17,7 @@ import pillowInitialStep from '../data/pillowInitialStep';
 import {characteristic_UUID, notify_UUID, service_UUID} from '../data/uuids';
 import {useBottomSheetBackHandler} from '../hooks/useBottomSheetBackHandler';
 import {BLEService} from '../services/BLEService';
-import {ActionStepType} from '../types/types';
+import ActionStepType from '../types/ActionStepType';
 import {charToDecimal, decodeFromBase64, encodeToBase64} from '../utils/common';
 import {loadStepLevel} from '../utils/storage/storage';
 import {useSwitchStore} from '../utils/zustand/store';

@@ -1,4 +1,6 @@
-const pillowStep = {
+import pillowStepType from '../types/pillowStepType';
+
+const pillowStep: pillowStepType = {
   shoulder: {
     1: 'PAAA',
     2: 'PAAB',
