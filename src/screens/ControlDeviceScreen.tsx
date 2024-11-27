@@ -11,35 +11,9 @@ import {NativeStackScreenProps} from 'react-native-screens/lib/typescript/native
 import BluetoothControlBottomSheet from '../components/BottomSheet/BluetoothControlBottomSheet';
 import BottomSheetBackdropHandler from '../components/BottomSheet/BottomSheetBackdropHandler';
 import BluetoothDisconnectModal from '../components/Modal/BluetoothDisconnectModal';
-import {
-  batteryValue,
-  set_head_step_1,
-  set_head_step_2,
-  set_head_step_3,
-  set_head_step_4,
-  set_head_step_5,
-  set_left_head_step_1,
-  set_left_head_step_2,
-  set_left_head_step_3,
-  set_left_head_step_4,
-  set_left_head_step_5,
-  set_neck_step_1,
-  set_neck_step_2,
-  set_neck_step_3,
-  set_neck_step_4,
-  set_neck_step_5,
-  set_right_head_step_1,
-  set_right_head_step_2,
-  set_right_head_step_3,
-  set_right_head_step_4,
-  set_right_head_step_5,
-  set_shoulder_step_1,
-  set_shoulder_step_2,
-  set_shoulder_step_3,
-  set_shoulder_step_4,
-  set_shoulder_step_5,
-  smell_turn_off,
-} from '../data/actions';
+import aromaStep from '../data/aromaStep';
+import batteryState from '../data/batteryState';
+import pillowInitialStep from '../data/pillowInitialStep';
 import {characteristic_UUID, notify_UUID, service_UUID} from '../data/uuids';
 import {useBottomSheetBackHandler} from '../hooks/useBottomSheetBackHandler';
 import {BLEService} from '../services/BLEService';
@@ -76,10 +50,10 @@ const ControlDeviceScreen = ({navigation}: Props) => {
 
   const batteryImage =
     batteryLevel === 100
-      ? require('../assets/battery100.png')
+      ? require('../assets/images/battery100.png')
       : batteryLevel === 50
-      ? require('../assets/battery50.png')
-      : require('../assets/battery30.png');
+      ? require('../assets/images/battery50.png')
+      : require('../assets/images/battery30.png');
 
   const handleCloseModal = () => {
     setIsModalVisible(false);
@@ -108,54 +82,54 @@ const ControlDeviceScreen = ({navigation}: Props) => {
     switch (part) {
       case 'shoulder':
         return stepLevel === 1
-          ? set_shoulder_step_1
+          ? pillowInitialStep.shoulder[1]
           : stepLevel === 2
-          ? set_shoulder_step_2
+          ? pillowInitialStep.shoulder[2]
           : stepLevel === 3
-          ? set_shoulder_step_3
+          ? pillowInitialStep.shoulder[3]
           : stepLevel === 4
-          ? set_shoulder_step_4
-          : set_shoulder_step_5;
+          ? pillowInitialStep.shoulder[4]
+          : pillowInitialStep.shoulder[5];
       case 'neck':
         return stepLevel === 1
-          ? set_neck_step_1
+          ? pillowInitialStep.neck[1]
           : stepLevel === 2
-          ? set_neck_step_2
+          ? pillowInitialStep.neck[2]
           : stepLevel === 3
-          ? set_neck_step_3
+          ? pillowInitialStep.neck[3]
           : stepLevel === 4
-          ? set_neck_step_4
-          : set_neck_step_5;
+          ? pillowInitialStep.neck[4]
+          : pillowInitialStep.neck[5];
       case 'head':
         return stepLevel === 1
-          ? set_head_step_1
+          ? pillowInitialStep.head[1]
           : stepLevel === 2
-          ? set_head_step_2
+          ? pillowInitialStep.head[2]
           : stepLevel === 3
-          ? set_head_step_3
+          ? pillowInitialStep.head[3]
           : stepLevel === 4
-          ? set_head_step_4
-          : set_head_step_5;
+          ? pillowInitialStep.head[4]
+          : pillowInitialStep.head[5];
       case 'rightHead':
         return stepLevel === 1
-          ? set_right_head_step_1
+          ? pillowInitialStep.right_head[1]
           : stepLevel === 2
-          ? set_right_head_step_2
+          ? pillowInitialStep.right_head[2]
           : stepLevel === 3
-          ? set_right_head_step_3
+          ? pillowInitialStep.right_head[3]
           : stepLevel === 4
-          ? set_right_head_step_4
-          : set_right_head_step_5;
+          ? pillowInitialStep.right_head[4]
+          : pillowInitialStep.right_head[5];
       case 'leftHead':
         return stepLevel === 1
-          ? set_left_head_step_1
+          ? pillowInitialStep.left_head[1]
           : stepLevel === 2
-          ? set_left_head_step_2
+          ? pillowInitialStep.left_head[2]
           : stepLevel === 3
-          ? set_left_head_step_3
+          ? pillowInitialStep.left_head[3]
           : stepLevel === 4
-          ? set_left_head_step_4
-          : set_left_head_step_5;
+          ? pillowInitialStep.left_head[4]
+          : pillowInitialStep.left_head[5];
       default:
         return null;
     }
@@ -262,7 +236,7 @@ const ControlDeviceScreen = ({navigation}: Props) => {
       );
 
       // 배터리 요청 데이터 생성 (기기 문서를 참조해 데이터 형식 확인 필요)
-      const base64Data = encodeToBase64(batteryValue); // 요청 데이터 변경 필요
+      const base64Data = encodeToBase64(batteryState); // 요청 데이터 변경 필요
 
       // 배터리 요청 전송
       await BLEService.manager.writeCharacteristicWithResponseForDevice(
@@ -303,7 +277,7 @@ const ControlDeviceScreen = ({navigation}: Props) => {
   };
 
   const sendFanTurnOff = async () => {
-    const data = encodeToBase64(smell_turn_off);
+    const data = encodeToBase64(aromaStep.turn_off);
 
     try {
       if (!deviceID) {
@@ -396,7 +370,7 @@ const ControlDeviceScreen = ({navigation}: Props) => {
             )}
 
             <Image
-              source={require('../assets/pilow.png')}
+              source={require('../assets/images/pilow.png')}
               style={{
                 maxWidth: '100%',
                 maxHeight: '40%',

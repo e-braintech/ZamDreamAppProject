@@ -45,12 +45,12 @@ const BluetoothConnectBottomSheet: React.FC<
 
   const source =
     connectionStatus === 'success'
-      ? require('../assets/lottie/connect.json')
+      ? require('../../assets/lottie/connect.json')
       : connectionStatus === 'fail'
-      ? require('../assets/lottie/fail.json')
+      ? require('../../assets/lottie/fail.json')
       : isScanComplete
-      ? require('../assets/lottie/find.json')
-      : require('../assets/lottie/search.json');
+      ? require('../../assets/lottie/find.json')
+      : require('../../assets/lottie/search.json');
 
   const buttonText =
     connectionStatus === 'success'
