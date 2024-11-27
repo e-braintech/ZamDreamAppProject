@@ -2,35 +2,6 @@ import {Device} from 'react-native-ble-plx';
 import {NativeStackNavigationProp} from 'react-native-screens/lib/typescript/native-stack/types';
 import {BLEService} from './BLEService';
 
-// 블루투스 장치 스캔 함수 (3초 후 스캔 중지)
-export const startDeviceScan = (
-  isScanning: boolean,
-  setIsScanning: React.Dispatch<React.SetStateAction<boolean>>,
-  setDevices: React.Dispatch<React.SetStateAction<Device[]>>,
-) => {
-  if (isScanning) return; // 이미 스캔 중이면 중복 실행 방지
-  setIsScanning(true);
-  setDevices([]); // 기존 기기 목록 초기화
-
-  BLEService.scanDevices(device => {
-    if (device.name) {
-      //   console.log(device.name);
-      setDevices(prevDevices => {
-        const exists = prevDevices.some(d => d.id === device.id);
-        if (!exists) {
-          return [...prevDevices, device];
-        }
-        return prevDevices;
-      });
-    }
-  });
-
-  setTimeout(() => {
-    BLEService.manager.stopDeviceScan();
-    setIsScanning(false);
-  }, 3000); // 3초 후 스캔 종료
-};
-
 // "ZAMDREAM" 기기와 연결하는 함수
 export const connectToDevice = async (
   devices: Device[],

@@ -21,8 +21,8 @@ import BluetoothConnectModal from '../components/Modal/BluetoothConnectModal';
 import useBluetoothState from '../hooks/useBluetoothState';
 import {useBottomSheetBackHandler} from '../hooks/useBottomSheetBackHandler';
 import useModal from '../hooks/useModal';
-import {startDeviceScan} from '../services';
 import {BLEService} from '../services/BLEService';
+import startBluetoothDeviceScan from '../utils/Bluetooth/startBluetoothDeviceScan';
 
 type Props = NativeStackScreenProps<ROOT_NAVIGATION, 'ScanDevice'>;
 
@@ -48,23 +48,21 @@ const ScanDeviceScreen = ({navigation}: Props) => {
     useBottomSheetBackHandler(bottomSheetModalRef);
 
   // Bluetooth 상태 확인 및 Modal or BottomSheet 동작 처리
-  const handleBluetoothState = async () => {
+  const startScanDevice = async () => {
     const state = await BLEService.manager.state();
     if (state === 'PoweredOn') {
-      // Bluetooth가 켜져 있을 경우 BottomSheet 표시
       bottomSheetModalRef.current?.present();
-      startDeviceScan(isScanning, setIsScanning, setDevices);
+      startBluetoothDeviceScan(isScanning, setIsScanning, setDevices);
     } else {
-      // Bluetooth가 꺼져 있을 경우 Modal 표시
       openModal();
     }
   };
 
   useEffect(() => {
     if (bluetoothState === 'off') {
-      console.log('Bluetooth is off. Please enable Bluetooth.');
+      console.log('블루투스 상태: off');
     } else if (bluetoothState === 'on') {
-      console.log('Bluetooth is on and ready.');
+      console.log('블루투스 상태: on');
     }
 
     console.log('Current app state:', appState);
@@ -101,7 +99,7 @@ const ScanDeviceScreen = ({navigation}: Props) => {
                 backgroundColor: '#FBFBFF',
                 borderRadius: 30,
               }}
-              onPress={handleBluetoothState}>
+              onPress={startScanDevice}>
               <Text
                 style={{fontSize: 20, fontWeight: 'bold', color: '#240843'}}>
                 시작하기
