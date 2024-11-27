@@ -1,30 +1,6 @@
-import {AppStateStatus} from 'react-native';
-import {Device, State} from 'react-native-ble-plx';
+import {Device} from 'react-native-ble-plx';
 import {NativeStackNavigationProp} from 'react-native-screens/lib/typescript/native-stack/types';
 import {BLEService} from './BLEService';
-
-// 앱 상태가 변경될 때 호출되는 함수
-export const handleAppStateChange = (
-  appState: AppStateStatus,
-  nextAppState: AppStateStatus,
-  setAppState: React.Dispatch<React.SetStateAction<AppStateStatus>>,
-  setBluetoothState: React.Dispatch<React.SetStateAction<string | null>>,
-) => {
-  console.log('Current app state: ', nextAppState); // 현재 상태 로그 출력
-
-  if (appState.match(/inactive|background/) && nextAppState === 'active') {
-    console.log('App has come to the foreground');
-    BLEService.manager.state().then(bluetoothState => {
-      if (bluetoothState === State.PoweredOn) {
-        console.log('Bluetooth is powered on');
-      } else {
-        console.log('Bluetooth is not powered on');
-        setBluetoothState('off');
-      }
-    });
-  }
-  setAppState(nextAppState); // 상태 업데이트
-};
 
 // 블루투스 장치 스캔 함수 (3초 후 스캔 중지)
 export const startDeviceScan = (

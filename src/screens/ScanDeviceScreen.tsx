@@ -6,8 +6,6 @@ import {
 import LottieView from 'lottie-react-native';
 import React, {useEffect, useMemo, useRef, useState} from 'react';
 import {
-  AppState,
-  AppStateStatus,
   ImageBackground,
   Platform,
   Pressable,
@@ -15,14 +13,15 @@ import {
   Text,
   View,
 } from 'react-native';
-import {Device, State} from 'react-native-ble-plx';
+import {Device} from 'react-native-ble-plx';
 import {NativeStackScreenProps} from 'react-native-screens/lib/typescript/native-stack/types';
 import BluetoothConnectBottomSheet from '../components/BottomSheet/BluetoothConnectBottomSheet';
 import BottomSheetBackdropHandler from '../components/BottomSheet/BottomSheetBackdropHandler';
 import BluetoothConnectModal from '../components/Modal/BluetoothConnectModal';
+import useBluetoothState from '../hooks/useBluetoothState';
 import {useBottomSheetBackHandler} from '../hooks/useBottomSheetBackHandler';
 import useModal from '../hooks/useModal';
-import {handleAppStateChange, startDeviceScan} from '../services';
+import {startDeviceScan} from '../services';
 import {BLEService} from '../services/BLEService';
 
 type Props = NativeStackScreenProps<ROOT_NAVIGATION, 'ScanDevice'>;
@@ -34,10 +33,6 @@ const ScanDeviceScreen = ({navigation}: Props) => {
       ? require('../assets/images/intro_ios.png')
       : require('../assets/images/intro_android.png');
 
-  const [bluetoothState, setBluetoothState] = useState<string | null>(null); // 블루투스 활성화 여부를 감지하는 상태
-  const [appState, setAppState] = useState<AppStateStatus>(
-    AppState.currentState,
-  ); // 앱 상태 저장
   const [devices, setDevices] = useState<Device[]>([]); // BLE 기기 저장
   const [isScanning, setIsScanning] = useState(false); // 스캔 상태
 
@@ -46,6 +41,8 @@ const ScanDeviceScreen = ({navigation}: Props) => {
   const snapPoints = useMemo(() => ['85%'], []);
 
   const {isModalVisible, openModal, closeModal} = useModal();
+
+  const {bluetoothState, appState} = useBluetoothState();
 
   const {handleSheetPositionChange} =
     useBottomSheetBackHandler(bottomSheetModalRef);
@@ -64,35 +61,14 @@ const ScanDeviceScreen = ({navigation}: Props) => {
   };
 
   useEffect(() => {
-    // 블루투스 상태 확인 및 상태 변경 감지
-    const subscription = BLEService.manager.onStateChange(state => {
-      if (state === State.PoweredOn) {
-        setBluetoothState('on');
-      } else if (state === State.PoweredOff) {
-        setBluetoothState('off');
-      } else {
-        setBluetoothState(state);
-      }
-    }, true);
+    if (bluetoothState === 'off') {
+      console.log('Bluetooth is off. Please enable Bluetooth.');
+    } else if (bluetoothState === 'on') {
+      console.log('Bluetooth is on and ready.');
+    }
 
-    // AppState를 통해 앱 상태 변경 감지
-    const appStateSubscription = AppState.addEventListener(
-      'change',
-      nextAppState => {
-        handleAppStateChange(
-          appState,
-          nextAppState,
-          setAppState,
-          setBluetoothState,
-        );
-      },
-    );
-
-    return () => {
-      subscription.remove(); // 컴포넌트 언마운트 시 상태 변경 감지 이벤트 해제
-      appStateSubscription.remove(); // 앱 상태 감지 해제
-    };
-  }, []);
+    console.log('Current app state:', appState);
+  }, [bluetoothState, appState]);
 
   return (
     <BottomSheetModalProvider>
