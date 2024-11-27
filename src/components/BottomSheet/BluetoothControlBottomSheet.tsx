@@ -8,36 +8,8 @@ import {
   View,
 } from 'react-native';
 import {NativeStackNavigationProp} from 'react-native-screens/lib/typescript/native-stack/types';
-import {
-  head_step_1,
-  head_step_2,
-  head_step_3,
-  head_step_4,
-  head_step_5,
-  left_head_step_1,
-  left_head_step_2,
-  left_head_step_3,
-  left_head_step_4,
-  left_head_step_5,
-  neck_step_1,
-  neck_step_2,
-  neck_step_3,
-  neck_step_4,
-  neck_step_5,
-  right_head_step_1,
-  right_head_step_2,
-  right_head_step_3,
-  right_head_step_4,
-  right_head_step_5,
-  shoulder_step_1,
-  shoulder_step_2,
-  shoulder_step_3,
-  shoulder_step_4,
-  shoulder_step_5,
-  smell_step_1,
-  smell_step_2,
-  smell_step_3,
-} from '../../data/actions';
+import aromaStep from '../../data/aromaStep';
+import pillowStep from '../../data/pillowStep';
 import {characteristic_UUID, service_UUID} from '../../data/uuids';
 import {BLEService} from '../../services/BLEService';
 import {encodeToBase64} from '../../utils/common';
@@ -69,16 +41,16 @@ const BluetoothControlBottomSheet: React.FC<
     s: {[key: number]: any}; // stepNumber가 6일 때의 이미지 맵
   } = {
     h: {
-      1: require('../assets/h01.png'),
-      2: require('../assets/h02.png'),
-      3: require('../assets/h03.png'),
-      4: require('../assets/h04.png'),
-      5: require('../assets/h05.png'),
+      1: require('../../assets/images/h01.png'),
+      2: require('../../assets/images/h02.png'),
+      3: require('../../assets/images/h03.png'),
+      4: require('../../assets/images/h04.png'),
+      5: require('../../assets/images/h05.png'),
     },
     s: {
-      1: require('../assets/s01.png'),
-      2: require('../assets/s02.png'),
-      3: require('../assets/s03.png'),
+      1: require('../../assets/images/s01.png'),
+      2: require('../../assets/images/s02.png'),
+      3: require('../../assets/images/s03.png'),
     },
   };
 
@@ -117,64 +89,60 @@ const BluetoothControlBottomSheet: React.FC<
     switch (stepNumber) {
       case 1:
         return stepLevel === 1
-          ? shoulder_step_1
+          ? pillowStep.shoulder[1]
           : stepLevel === 2
-          ? shoulder_step_2
+          ? pillowStep.shoulder[2]
           : stepLevel === 3
-          ? shoulder_step_3
+          ? pillowStep.shoulder[3]
           : stepLevel === 4
-          ? shoulder_step_4
-          : shoulder_step_5;
+          ? pillowStep.shoulder[4]
+          : pillowStep.shoulder[5];
       case 2:
         return stepLevel === 1
-          ? neck_step_1
+          ? pillowStep.neck[1]
           : stepLevel === 2
-          ? neck_step_2
+          ? pillowStep.neck[2]
           : stepLevel === 3
-          ? neck_step_3
+          ? pillowStep.neck[3]
           : stepLevel === 4
-          ? neck_step_4
-          : neck_step_5;
+          ? pillowStep.neck[4]
+          : pillowStep.neck[5];
       case 3:
         return stepLevel === 1
-          ? head_step_1
+          ? pillowStep.head[1]
           : stepLevel === 2
-          ? head_step_2
+          ? pillowStep.head[2]
           : stepLevel === 3
-          ? head_step_3
+          ? pillowStep.head[3]
           : stepLevel === 4
-          ? head_step_4
-          : head_step_5;
+          ? pillowStep.head[4]
+          : pillowStep.head[5];
       case 4:
         return stepLevel === 1
-          ? right_head_step_1
+          ? pillowStep.right_head[1]
           : stepLevel === 2
-          ? right_head_step_2
+          ? pillowStep.right_head[2]
           : stepLevel === 3
-          ? right_head_step_3
+          ? pillowStep.right_head[3]
           : stepLevel === 4
-          ? right_head_step_4
-          : right_head_step_5;
+          ? pillowStep.right_head[4]
+          : pillowStep.right_head[5];
       case 5:
         return stepLevel === 1
-          ? left_head_step_1
+          ? pillowStep.left_head[1]
           : stepLevel === 2
-          ? left_head_step_2
+          ? pillowStep.left_head[2]
           : stepLevel === 3
-          ? left_head_step_3
+          ? pillowStep.left_head[3]
           : stepLevel === 4
-          ? left_head_step_4
-          : left_head_step_5;
+          ? pillowStep.left_head[4]
+          : pillowStep.left_head[5];
       case 6:
         return stepLevel === 1
-          ? smell_step_1
+          ? aromaStep.turn_on[1]
           : stepLevel === 2
-          ? smell_step_2
-          : stepLevel === 3
-          ? smell_step_3
-          : // : stepLevel === 4
-            // ? smell_turn_off
-            null; // 잘못된 stepLevel에 대해 null 반환
+          ? aromaStep.turn_on[2]
+          : aromaStep.turn_on[3];
       default:
         return null;
     }
@@ -356,7 +324,7 @@ const BluetoothControlBottomSheet: React.FC<
         }}>
         <TouchableOpacity onPress={handleDecrease}>
           <Image
-            source={require('../assets/arw_down.png')}
+            source={require('../../assets/images/arw_down.png')}
             style={{width: 36, height: 36}}
             resizeMode="contain"
           />
@@ -374,7 +342,7 @@ const BluetoothControlBottomSheet: React.FC<
 
         <TouchableOpacity onPress={handleIncrease}>
           <Image
-            source={require('../assets/arw_up.png')}
+            source={require('../../assets/images/arw_up.png')}
             style={{width: 36, height: 36}}
             resizeMode="contain"
           />

@@ -40,7 +40,7 @@ const BluetoothDisconnectModal: React.FC<BluetoothDisconnectModalProps> = ({
             borderRadius: 20,
           }}>
           <LottieView
-            source={require('../assets/lottie/fail.json')}
+            source={require('../../assets/lottie/fail.json')}
             style={{width: 224, height: 102}}
             autoPlay={true}
             loop={true}

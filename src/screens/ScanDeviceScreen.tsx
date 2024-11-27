@@ -30,8 +30,8 @@ const ScanDeviceScreen = ({navigation}: Props) => {
   // Logic
   const source =
     Platform.OS === 'ios'
-      ? require('../assets/intro_ios.png')
-      : require('../assets/intro_android.png');
+      ? require('../assets/images/intro_ios.png')
+      : require('../assets/images/intro_android.png');
 
   const [bluetoothState, setBluetoothState] = useState<string | null>(null); // 블루투스 활성화 여부를 감지하는 상태
   const [isModalVisible, setIsModalVisible] = useState(false); // BluetoothModal 상태
