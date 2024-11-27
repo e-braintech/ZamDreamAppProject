@@ -16,6 +16,7 @@ import batteryState from '../data/batteryState';
 import pillowInitialStep from '../data/pillowInitialStep';
 import {characteristic_UUID, notify_UUID, service_UUID} from '../data/uuids';
 import {useBottomSheetBackHandler} from '../hooks/useBottomSheetBackHandler';
+import useModal from '../hooks/useModal';
 import {BLEService} from '../services/BLEService';
 import ActionStepType from '../types/ActionStepType';
 import {charToDecimal, decodeFromBase64, encodeToBase64} from '../utils/common';
@@ -40,7 +41,6 @@ const ControlDeviceScreen = ({navigation}: Props) => {
   const {deviceID} = route.params; // 전달받은 기기 데이터
   const [selectedStep, setSelectedStep] = useState<ActionStepType | null>(null);
   const [batteryLevel, setBatteryLevel] = useState<number | null>(null); // 배터리 레벨을 저장하는 상태
-  const [modalVisible, setIsModalVisible] = useState<boolean>(false);
 
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
 
@@ -55,9 +55,7 @@ const ControlDeviceScreen = ({navigation}: Props) => {
       ? require('../assets/images/battery50.png')
       : require('../assets/images/battery30.png');
 
-  const handleCloseModal = () => {
-    setIsModalVisible(false);
-  };
+  const {isModalVisible, openModal, closeModal} = useModal();
 
   const {handleSheetPositionChange} =
     useBottomSheetBackHandler(bottomSheetModalRef);
@@ -140,12 +138,14 @@ const ControlDeviceScreen = ({navigation}: Props) => {
       .cancelDeviceConnection(deviceID)
       .then(() => {
         console.log('Connection reset successfully');
-        setIsModalVisible(false);
+        // setIsModalVisible(false);
+        closeModal();
         navigation.navigate('ScanDevice');
       })
       .catch(error => {
         console.log('Failed to reset connection:', error);
-        setIsModalVisible(false);
+        // setIsModalVisible(false);
+        closeModal();
         navigation.navigate('ScanDevice');
       });
   };
@@ -176,7 +176,7 @@ const ControlDeviceScreen = ({navigation}: Props) => {
 
       if (!deviceID) {
         console.log('No connected device found');
-        setIsModalVisible(!modalVisible);
+        openModal();
         return;
       }
 
@@ -185,7 +185,7 @@ const ControlDeviceScreen = ({navigation}: Props) => {
       if (!isConnected) {
         console.log('Device is not connected. Reconnecting...');
         await BLEService.manager.connectToDevice(deviceID).catch(() => {
-          setIsModalVisible(!modalVisible);
+          openModal();
           return;
         });
       }
@@ -225,7 +225,7 @@ const ControlDeviceScreen = ({navigation}: Props) => {
       if (!isConnected) {
         console.log('Device is not connected. Reconnecting...');
         await BLEService.manager.connectToDevice(deviceID).catch(() => {
-          setIsModalVisible(!modalVisible);
+          openModal();
           return;
         });
       }
@@ -256,8 +256,7 @@ const ControlDeviceScreen = ({navigation}: Props) => {
         (error, characteristic) => {
           if (error) {
             console.log('Failed to monitor characteristic:', error);
-            setIsModalVisible(true);
-            // resetAndNavigateToScanScreen(deviceID, navigation);
+            openModal();
             return;
           }
 
@@ -674,8 +673,8 @@ const ControlDeviceScreen = ({navigation}: Props) => {
             </BottomSheetModal>
 
             <BluetoothDisconnectModal
-              visible={modalVisible}
-              onClose={handleCloseModal}
+              visible={isModalVisible}
+              onClose={closeModal}
               handleReconnect={handleBluetoothReconnect}
             />
           </View>

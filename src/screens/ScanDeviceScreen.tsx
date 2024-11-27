@@ -21,6 +21,7 @@ import BluetoothConnectBottomSheet from '../components/BottomSheet/BluetoothConn
 import BottomSheetBackdropHandler from '../components/BottomSheet/BottomSheetBackdropHandler';
 import BluetoothConnectModal from '../components/Modal/BluetoothConnectModal';
 import {useBottomSheetBackHandler} from '../hooks/useBottomSheetBackHandler';
+import useModal from '../hooks/useModal';
 import {handleAppStateChange, startDeviceScan} from '../services';
 import {BLEService} from '../services/BLEService';
 
@@ -34,7 +35,6 @@ const ScanDeviceScreen = ({navigation}: Props) => {
       : require('../assets/images/intro_android.png');
 
   const [bluetoothState, setBluetoothState] = useState<string | null>(null); // 블루투스 활성화 여부를 감지하는 상태
-  const [isModalVisible, setIsModalVisible] = useState(false); // BluetoothModal 상태
   const [appState, setAppState] = useState<AppStateStatus>(
     AppState.currentState,
   ); // 앱 상태 저장
@@ -45,9 +45,7 @@ const ScanDeviceScreen = ({navigation}: Props) => {
 
   const snapPoints = useMemo(() => ['85%'], []);
 
-  const handleCloseModal = () => {
-    setIsModalVisible(false);
-  };
+  const {isModalVisible, openModal, closeModal} = useModal();
 
   const {handleSheetPositionChange} =
     useBottomSheetBackHandler(bottomSheetModalRef);
@@ -61,7 +59,7 @@ const ScanDeviceScreen = ({navigation}: Props) => {
       startDeviceScan(isScanning, setIsScanning, setDevices);
     } else {
       // Bluetooth가 꺼져 있을 경우 Modal 표시
-      setIsModalVisible(true);
+      openModal();
     }
   };
 
@@ -158,10 +156,7 @@ const ScanDeviceScreen = ({navigation}: Props) => {
             </BottomSheetView>
           </BottomSheetModal>
         </ImageBackground>
-        <BluetoothConnectModal
-          visible={isModalVisible}
-          onClose={handleCloseModal}
-        />
+        <BluetoothConnectModal visible={isModalVisible} onClose={closeModal} />
       </SafeAreaView>
     </BottomSheetModalProvider>
   );
