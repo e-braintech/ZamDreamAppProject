@@ -1,11 +1,10 @@
 import {
-  BottomSheetBackdrop,
   BottomSheetModal,
   BottomSheetModalProvider,
   BottomSheetView,
 } from '@gorhom/bottom-sheet';
 import LottieView from 'lottie-react-native';
-import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
+import React, {useEffect, useMemo, useRef, useState} from 'react';
 import {
   AppState,
   AppStateStatus,
@@ -18,8 +17,9 @@ import {
 } from 'react-native';
 import {Device, State} from 'react-native-ble-plx';
 import {NativeStackScreenProps} from 'react-native-screens/lib/typescript/native-stack/types';
-import BluetoothConnectBottomSheet from '../components/BluetoothConnectBottomSheet';
-import BluetoothConnectModal from '../components/BluetoothConnectModal';
+import BluetoothConnectBottomSheet from '../components/BottomSheet/BluetoothConnectBottomSheet';
+import BottomSheetBackdropHandler from '../components/BottomSheet/BottomSheetBackdropHandler';
+import BluetoothConnectModal from '../components/Modal/BluetoothConnectModal';
 import {useBottomSheetBackHandler} from '../hooks/useBottomSheetBackHandler';
 import {handleAppStateChange, startDeviceScan} from '../services';
 import {BLEService} from '../services/BLEService';
@@ -48,11 +48,6 @@ const ScanDeviceScreen = ({navigation}: Props) => {
   const handleCloseModal = () => {
     setIsModalVisible(false);
   };
-
-  const renderBackdrop = useCallback(
-    (props: any) => <BottomSheetBackdrop {...props} pressBehavior="close" />,
-    [],
-  );
 
   const {handleSheetPositionChange} =
     useBottomSheetBackHandler(bottomSheetModalRef);
@@ -145,7 +140,7 @@ const ScanDeviceScreen = ({navigation}: Props) => {
             index={1}
             snapPoints={snapPoints}
             enablePanDownToClose={true}
-            backdropComponent={renderBackdrop}
+            backdropComponent={BottomSheetBackdropHandler}
             onChange={handleSheetPositionChange}
             handleStyle={{backgroundColor: '#F3F1FF', borderRadius: 50}}
             handleIndicatorStyle={{

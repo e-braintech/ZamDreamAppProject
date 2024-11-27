@@ -37,12 +37,12 @@ import {
   smell_step_1,
   smell_step_2,
   smell_step_3,
-} from '../data/actions';
-import {characteristic_UUID, service_UUID} from '../data/uuids';
-import {BLEService} from '../services/BLEService';
-import {encodeToBase64} from '../utils/common';
-import {loadStepLevel} from '../utils/storage/storage';
-import {useStepStore, useSwitchStore} from '../utils/zustand/store';
+} from '../../data/actions';
+import {characteristic_UUID, service_UUID} from '../../data/uuids';
+import {BLEService} from '../../services/BLEService';
+import {encodeToBase64} from '../../utils/common';
+import {loadStepLevel} from '../../utils/storage/storage';
+import {useStepStore, useSwitchStore} from '../../utils/zustand/store';
 
 interface BluetoothControlBottomSheetProps {
   navigation: NativeStackNavigationProp<ROOT_NAVIGATION, 'ScanDevice'>;

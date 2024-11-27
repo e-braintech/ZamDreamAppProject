@@ -10,7 +10,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import {BLEService} from '../services/BLEService';
+import {BLEService} from '../../services/BLEService';
 
 interface BluetoothConnectModalProps {
   visible: boolean;

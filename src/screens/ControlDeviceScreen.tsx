@@ -1,5 +1,4 @@
 import {
-  BottomSheetBackdrop,
   BottomSheetModal,
   BottomSheetModalProvider,
   BottomSheetView,
@@ -9,8 +8,9 @@ import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {Image, Pressable, SafeAreaView, Switch, Text, View} from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import {NativeStackScreenProps} from 'react-native-screens/lib/typescript/native-stack/types';
-import BluetoothControlBottomSheet from '../components/BluetoothControlBottomSheet';
-import BluetoothDisconnectModal from '../components/BluetoothDisconnectModal';
+import BluetoothControlBottomSheet from '../components/BottomSheet/BluetoothControlBottomSheet';
+import BottomSheetBackdropHandler from '../components/BottomSheet/BottomSheetBackdropHandler';
+import BluetoothDisconnectModal from '../components/Modal/BluetoothDisconnectModal';
 import {
   batteryValue,
   set_head_step_1,
@@ -95,11 +95,6 @@ const ControlDeviceScreen = ({navigation}: Props) => {
       bottomSheetModalRef.current?.present();
     }
   }, []);
-
-  const renderBackdrop = useCallback(
-    (props: any) => <BottomSheetBackdrop {...props} pressBehavior="close" />,
-    [],
-  );
 
   const hideBottomSheet = () => {
     bottomSheetModalRef.current?.close();
@@ -682,7 +677,7 @@ const ControlDeviceScreen = ({navigation}: Props) => {
               index={2}
               snapPoints={snapPoints}
               enablePanDownToClose={true}
-              backdropComponent={renderBackdrop}
+              backdropComponent={BottomSheetBackdropHandler}
               onChange={handleSheetPositionChange}
               handleStyle={{backgroundColor: '#F3F1FF', borderRadius: 50}}
               handleIndicatorStyle={{
