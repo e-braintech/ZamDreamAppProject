@@ -13,12 +13,12 @@ import BottomSheetBackdropHandler from '../components/BottomSheet/BottomSheetBac
 import BluetoothDisconnectModal from '../components/Modal/BluetoothDisconnectModal';
 import aromaStep from '../data/aromaStep';
 import batteryState from '../data/batteryState';
-import pillowInitialStep from '../data/pillowInitialStep';
 import {characteristic_UUID, notify_UUID, service_UUID} from '../data/uuids';
 import {useBottomSheetBackHandler} from '../hooks/useBottomSheetBackHandler';
 import useModal from '../hooks/useModal';
 import {BLEService} from '../services/BLEService';
 import ActionStepType from '../types/ActionStepType';
+import getPillowInitialStepData from '../utils/Bluetooth/getPillowInitialStepData';
 import {charToDecimal, decodeFromBase64, encodeToBase64} from '../utils/common';
 import {loadStepLevel} from '../utils/storage/storage';
 import {useSwitchStore} from '../utils/zustand/store';
@@ -76,63 +76,6 @@ const ControlDeviceScreen = ({navigation}: Props) => {
     setEnabled(!isEnabled);
   };
 
-  const getBluetoothData = (part: string, stepLevel: number): string | null => {
-    switch (part) {
-      case 'shoulder':
-        return stepLevel === 1
-          ? pillowInitialStep.shoulder[1]
-          : stepLevel === 2
-          ? pillowInitialStep.shoulder[2]
-          : stepLevel === 3
-          ? pillowInitialStep.shoulder[3]
-          : stepLevel === 4
-          ? pillowInitialStep.shoulder[4]
-          : pillowInitialStep.shoulder[5];
-      case 'neck':
-        return stepLevel === 1
-          ? pillowInitialStep.neck[1]
-          : stepLevel === 2
-          ? pillowInitialStep.neck[2]
-          : stepLevel === 3
-          ? pillowInitialStep.neck[3]
-          : stepLevel === 4
-          ? pillowInitialStep.neck[4]
-          : pillowInitialStep.neck[5];
-      case 'head':
-        return stepLevel === 1
-          ? pillowInitialStep.head[1]
-          : stepLevel === 2
-          ? pillowInitialStep.head[2]
-          : stepLevel === 3
-          ? pillowInitialStep.head[3]
-          : stepLevel === 4
-          ? pillowInitialStep.head[4]
-          : pillowInitialStep.head[5];
-      case 'rightHead':
-        return stepLevel === 1
-          ? pillowInitialStep.right_head[1]
-          : stepLevel === 2
-          ? pillowInitialStep.right_head[2]
-          : stepLevel === 3
-          ? pillowInitialStep.right_head[3]
-          : stepLevel === 4
-          ? pillowInitialStep.right_head[4]
-          : pillowInitialStep.right_head[5];
-      case 'leftHead':
-        return stepLevel === 1
-          ? pillowInitialStep.left_head[1]
-          : stepLevel === 2
-          ? pillowInitialStep.left_head[2]
-          : stepLevel === 3
-          ? pillowInitialStep.left_head[3]
-          : stepLevel === 4
-          ? pillowInitialStep.left_head[4]
-          : pillowInitialStep.left_head[5];
-      default:
-        return null;
-    }
-  };
-
   const handleBluetoothReconnect = async () => {
     await BLEService.manager
       .cancelDeviceConnection(deviceID)
@@ -155,7 +98,7 @@ const ControlDeviceScreen = ({navigation}: Props) => {
 
     parts.forEach(part => {
       const stepLevel = loadStepLevel(part);
-      const data = getBluetoothData(part, stepLevel);
+      const data = getPillowInitialStepData(part, stepLevel);
 
       if (data) {
         sendDataToDevice(data, part, stepLevel); // 부위, 단계, 데이터를 함께 전송
