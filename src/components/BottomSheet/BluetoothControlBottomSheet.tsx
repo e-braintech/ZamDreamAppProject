@@ -8,11 +8,9 @@ import {
   View,
 } from 'react-native';
 import {NativeStackNavigationProp} from 'react-native-screens/lib/typescript/native-stack/types';
-import aromaStep from '../../data/aromaStep';
-import pillowStep from '../../data/pillowStep';
-import {characteristic_UUID, service_UUID} from '../../data/uuids';
-import {BLEService} from '../../services/BLEService';
-import {encodeToBase64} from '../../utils/common';
+import useModal from '../../hooks/useModal';
+import getPillowStepData from '../../utils/Bluetooth/getPillowStepData';
+import sendBluetoothDataToDevice from '../../utils/Bluetooth/sendBluetoothDataToDevice';
 import {loadStepLevel} from '../../utils/storage/storage';
 import {useStepStore, useSwitchStore} from '../../utils/zustand/store';
 
@@ -28,12 +26,13 @@ const BluetoothControlBottomSheet: React.FC<
   BluetoothControlBottomSheetProps
 > = ({navigation, stepNumber, title, deviceID, hideBottomSheet}) => {
   // Logic
-  const {shoulder, neck, head, rightHead, leftHead, smell, setStep} =
-    useStepStore();
-
   const [stepLevel, setStepLevel] = useState<number>(1); // 단계 수 상태 추가
 
+  const {setStep} = useStepStore();
+
   const {setEnabled} = useSwitchStore();
+
+  const {openModal} = useModal();
 
   // 이미지 맵 정의
   const imageMap: {
@@ -81,73 +80,6 @@ const BluetoothControlBottomSheet: React.FC<
     });
   };
 
-  // 단계별 Bluetooth 데이터 가져오기
-  const getBluetoothData = (
-    stepNumber: number,
-    stepLevel: number,
-  ): string | null => {
-    switch (stepNumber) {
-      case 1:
-        return stepLevel === 1
-          ? pillowStep.shoulder[1]
-          : stepLevel === 2
-          ? pillowStep.shoulder[2]
-          : stepLevel === 3
-          ? pillowStep.shoulder[3]
-          : stepLevel === 4
-          ? pillowStep.shoulder[4]
-          : pillowStep.shoulder[5];
-      case 2:
-        return stepLevel === 1
-          ? pillowStep.neck[1]
-          : stepLevel === 2
-          ? pillowStep.neck[2]
-          : stepLevel === 3
-          ? pillowStep.neck[3]
-          : stepLevel === 4
-          ? pillowStep.neck[4]
-          : pillowStep.neck[5];
-      case 3:
-        return stepLevel === 1
-          ? pillowStep.head[1]
-          : stepLevel === 2
-          ? pillowStep.head[2]
-          : stepLevel === 3
-          ? pillowStep.head[3]
-          : stepLevel === 4
-          ? pillowStep.head[4]
-          : pillowStep.head[5];
-      case 4:
-        return stepLevel === 1
-          ? pillowStep.right_head[1]
-          : stepLevel === 2
-          ? pillowStep.right_head[2]
-          : stepLevel === 3
-          ? pillowStep.right_head[3]
-          : stepLevel === 4
-          ? pillowStep.right_head[4]
-          : pillowStep.right_head[5];
-      case 5:
-        return stepLevel === 1
-          ? pillowStep.left_head[1]
-          : stepLevel === 2
-          ? pillowStep.left_head[2]
-          : stepLevel === 3
-          ? pillowStep.left_head[3]
-          : stepLevel === 4
-          ? pillowStep.left_head[4]
-          : pillowStep.left_head[5];
-      case 6:
-        return stepLevel === 1
-          ? aromaStep.turn_on[1]
-          : stepLevel === 2
-          ? aromaStep.turn_on[2]
-          : aromaStep.turn_on[3];
-      default:
-        return null;
-    }
-  };
-
   // 부위 이름 반환
   const getPartName = (stepNumber: number) => {
     switch (stepNumber) {
@@ -168,46 +100,9 @@ const BluetoothControlBottomSheet: React.FC<
     }
   };
 
-  // 데이터를 블루투스 기기로 보내는 함수
-  const sendDataToDevice = async (data: string) => {
-    console.log(data);
-
-    try {
-      const base64Data = encodeToBase64(data);
-
-      if (!deviceID) {
-        console.log('No connected device found');
-        return;
-      }
-
-      // 연결 상태 확인
-      const isConnected = await BLEService.manager.isDeviceConnected(deviceID);
-      if (!isConnected) {
-        // console.log('Device is not connected. Resetting connection...');
-        // resetAndNavigateToScanScreen(deviceID, navigation);
-        return;
-      }
-
-      BLEService.manager
-        .writeCharacteristicWithResponseForDevice(
-          deviceID,
-          service_UUID,
-          characteristic_UUID,
-          base64Data,
-        )
-        .then(res => {
-          // console.log('Data sent: ', JSON.stringify(res, null, 5));
-        })
-        .catch(err => console.log('Error sending data:', err));
-    } catch (error) {
-      console.log('Failed to send data:', error);
-      // resetAndNavigateToScanScreen(deviceID, navigation); // 오류 시 탐색 화면으로 이동
-    }
-  };
-
   // '확인' 버튼 클릭 시 데이터를 전송하는 함수
   const handleConfirm = async () => {
-    const data = getBluetoothData(stepNumber, stepLevel);
+    const data = getPillowStepData(stepNumber, stepLevel);
 
     if (stepNumber === 6 && stepLevel >= 1 && stepLevel <= 3) {
       setEnabled(true); // 조건이 맞으면 `isEnabled`를 true로 변경
@@ -215,7 +110,7 @@ const BluetoothControlBottomSheet: React.FC<
 
     try {
       if (data) {
-        await sendDataToDevice(data)
+        await sendBluetoothDataToDevice(data, stepLevel, deviceID, openModal)
           .then(() => {
             const part = getPartName(stepNumber);
             setStep(part, stepLevel); // 상태 저장

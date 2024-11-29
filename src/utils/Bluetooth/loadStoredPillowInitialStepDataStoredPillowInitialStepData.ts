@@ -14,7 +14,7 @@ const loadStoredPillowInitialStepData = async (
     const data = getPillowInitialStepData(part, stepLevel);
 
     if (data) {
-      sendBluetoothDataToDevice(data, part, stepLevel, deviceID, openModal);
+      sendBluetoothDataToDevice(data, stepLevel, deviceID, openModal, part);
     }
   });
 };

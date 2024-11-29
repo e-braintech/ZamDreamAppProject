@@ -5,10 +5,10 @@ import {encodeToBase64} from '../common';
 // 기기 높낮이 초기값 전송 함수
 const sendBluetoothDataToDevice = async (
   data: string,
-  part: string,
   stepLevel: number,
   deviceID: string,
   openModal: () => void,
+  part?: string,
 ) => {
   console.log(data);
 
