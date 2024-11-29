@@ -3,6 +3,7 @@ import {characteristic_UUID, service_UUID} from '../../data/uuids';
 import {BLEService} from '../../services/BLEService';
 import {encodeToBase64} from '../common';
 
+// 방향 종료 시키는 함수
 const requestFanTurnOff = async (deviceID: string) => {
   const data = encodeToBase64(aromaStep.turn_off);
 
