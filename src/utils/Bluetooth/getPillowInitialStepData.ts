@@ -1,6 +1,6 @@
 import pillowInitialStep from '../../data/pillowInitialStep';
 
-// 기기 높낮이 초기값 전송 함수
+// 기기 높낮이 초기값 설정 함수
 const getPillowInitialStepData = (
   part: string,
   stepLevel: number,

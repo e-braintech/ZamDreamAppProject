@@ -12,16 +12,12 @@ import BluetoothControlBottomSheet from '../components/BottomSheet/BluetoothCont
 import BottomSheetBackdropHandler from '../components/BottomSheet/BottomSheetBackdropHandler';
 import BluetoothDisconnectModal from '../components/Modal/BluetoothDisconnectModal';
 import batteryState from '../data/batteryState';
-import {characteristic_UUID, service_UUID} from '../data/uuids';
 import {useBottomSheetBackHandler} from '../hooks/useBottomSheetBackHandler';
 import useModal from '../hooks/useModal';
-import {BLEService} from '../services/BLEService';
 import ActionStepType from '../types/ActionStepType';
-import getPillowInitialStepData from '../utils/Bluetooth/getPillowInitialStepData';
+import loadStoredPillowInitialStepData from '../utils/Bluetooth/loadStoredPillowInitialStepDataStoredPillowInitialStepData';
 import requestBatteryLevel from '../utils/Bluetooth/requestBatteryLevel';
 import requestFanTurnOff from '../utils/Bluetooth/requestFanTurnOff';
-import {encodeToBase64} from '../utils/common';
-import {loadStepLevel} from '../utils/storage/storage';
 import {useSwitchStore} from '../utils/zustand/store';
 
 type Props = NativeStackScreenProps<ROOT_NAVIGATION, 'ScanDevice'>;
@@ -73,68 +69,6 @@ const ControlDeviceScreen = ({navigation}: Props) => {
     bottomSheetModalRef.current?.close();
   };
 
-  const sendStoredStepsToDevice = async () => {
-    const parts = ['shoulder', 'neck', 'head', 'rightHead', 'leftHead'];
-
-    parts.forEach(part => {
-      const stepLevel = loadStepLevel(part);
-      const data = getPillowInitialStepData(part, stepLevel);
-
-      if (data) {
-        sendDataToDevice(data, part, stepLevel); // 부위, 단계, 데이터를 함께 전송
-      }
-    });
-  };
-
-  // 데이터를 블루투스 기기로 보내는 함수
-  const sendDataToDevice = async (
-    data: string,
-    part: string,
-    stepLevel: number,
-  ) => {
-    console.log(data);
-
-    try {
-      const base64Data = encodeToBase64(data);
-
-      if (!deviceID) {
-        console.log('No connected device found');
-        openModal();
-        return;
-      }
-
-      // 연결 상태 확인
-      const isConnected = await BLEService.manager.isDeviceConnected(deviceID);
-      if (!isConnected) {
-        console.log('Device is not connected. Reconnecting...');
-        await BLEService.manager.connectToDevice(deviceID).catch(() => {
-          openModal();
-          return;
-        });
-      }
-
-      BLEService.manager
-        .writeCharacteristicWithResponseForDevice(
-          deviceID,
-          service_UUID,
-          characteristic_UUID,
-          base64Data,
-        )
-        .then(res => {
-          console.log(
-            `Data sent successfully for ${part} at level ${stepLevel}`,
-          );
-          // console.log('Data sent: ', JSON.stringify(res, null, 5));
-        })
-        .catch(err => {
-          // console.log('Error sending data:', err)
-          return;
-        });
-    } catch (error) {
-      console.log('Failed to send data:', error);
-    }
-  };
-
   useEffect(() => {
     if (!isEnabled) {
       requestFanTurnOff(deviceID);
@@ -142,7 +76,7 @@ const ControlDeviceScreen = ({navigation}: Props) => {
   }, [isEnabled]);
 
   useEffect(() => {
-    sendStoredStepsToDevice();
+    loadStoredPillowInitialStepData(deviceID, openModal);
   }, []);
 
   useFocusEffect(
