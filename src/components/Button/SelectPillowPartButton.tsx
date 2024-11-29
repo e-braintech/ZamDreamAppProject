@@ -44,10 +44,10 @@ const SelectPillowPartButton: React.FC<SelectPillowPartButtonProps> = ({
           }}>
           {pillowButtonNumber}
         </Text>
-        <Text style={{fontSize: 18, fontWeight: 'bold', color: '#ffffff'}}>
-          {pillowButtonText}
-        </Text>
       </View>
+      <Text style={{fontSize: 18, fontWeight: 'bold', color: '#ffffff'}}>
+        {pillowButtonText}
+      </Text>
     </Pressable>
   );
 };

@@ -5,11 +5,12 @@ import {
 } from '@gorhom/bottom-sheet';
 import {RouteProp, useFocusEffect, useRoute} from '@react-navigation/native';
 import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
-import {Image, Pressable, SafeAreaView, Switch, Text, View} from 'react-native';
+import {Image, SafeAreaView, Switch, Text, View} from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import {NativeStackScreenProps} from 'react-native-screens/lib/typescript/native-stack/types';
 import BluetoothControlBottomSheet from '../components/BottomSheet/BluetoothControlBottomSheet';
 import BottomSheetBackdropHandler from '../components/BottomSheet/BottomSheetBackdropHandler';
+import SelectPillowPartButton from '../components/Button/SelectPillowPartButton';
 import BluetoothDisconnectModal from '../components/Modal/BluetoothDisconnectModal';
 import batteryState from '../data/batteryState';
 import {useBottomSheetBackHandler} from '../hooks/useBottomSheetBackHandler';
@@ -150,119 +151,23 @@ const ControlDeviceScreen = ({navigation}: Props) => {
                 alignItems: 'center',
                 marginBottom: 20,
               }}>
-              <Pressable
-                style={{
-                  flex: 1,
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  paddingVertical: 16,
-                  backgroundColor: '#5B3BC4',
-                  borderWidth: 0.1,
-                  borderColor: '#ffffff',
-                  borderRadius: 10,
-                  marginHorizontal: 5,
-                }}
-                onPress={() => handlePresentModalPress(actionStep[0].number)}>
-                <View
-                  style={{
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    width: 20,
-                    height: 20,
-                    borderRadius: 15,
-                    backgroundColor: '#ffffff',
-                    marginBottom: 10,
-                  }}>
-                  <Text
-                    style={{
-                      color: '#240843',
-                      fontWeight: 'bold',
-                      fontSize: 16,
-                    }}>
-                    {actionStep[0].number}
-                  </Text>
-                </View>
-                <Text
-                  style={{fontSize: 18, fontWeight: 'bold', color: '#ffffff'}}>
-                  {actionStep[0].title}
-                </Text>
-              </Pressable>
+              <SelectPillowPartButton
+                pillowButtonNumber={actionStep[0].number}
+                pillowButtonText={actionStep[0].title}
+                sendToData={() => handlePresentModalPress(actionStep[0].number)}
+              />
 
-              <Pressable
-                style={{
-                  flex: 1,
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  paddingVertical: 16,
-                  backgroundColor: '#5B3BC4',
-                  borderWidth: 0.1,
-                  borderColor: '#ffffff',
-                  borderRadius: 10,
-                  marginHorizontal: 5,
-                }}
-                onPress={() => handlePresentModalPress(actionStep[1].number)}>
-                <View
-                  style={{
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    width: 20,
-                    height: 20,
-                    borderRadius: 15,
-                    backgroundColor: '#ffffff',
-                    marginBottom: 10,
-                  }}>
-                  <Text
-                    style={{
-                      color: '#240843',
-                      fontWeight: 'bold',
-                      fontSize: 16,
-                    }}>
-                    {actionStep[1].number}
-                  </Text>
-                </View>
-                <Text
-                  style={{fontSize: 18, fontWeight: 'bold', color: '#ffffff'}}>
-                  {actionStep[1].title}
-                </Text>
-              </Pressable>
+              <SelectPillowPartButton
+                pillowButtonNumber={actionStep[1].number}
+                pillowButtonText={actionStep[1].title}
+                sendToData={() => handlePresentModalPress(actionStep[1].number)}
+              />
 
-              <Pressable
-                style={{
-                  flex: 1,
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  paddingVertical: 16,
-                  backgroundColor: '#5B3BC4',
-                  borderWidth: 0.1,
-                  borderColor: '#ffffff',
-                  borderRadius: 10,
-                  marginHorizontal: 5,
-                }}
-                onPress={() => handlePresentModalPress(actionStep[2].number)}>
-                <View
-                  style={{
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    width: 20,
-                    height: 20,
-                    borderRadius: 15,
-                    backgroundColor: '#ffffff',
-                    marginBottom: 10,
-                  }}>
-                  <Text
-                    style={{
-                      color: '#240843',
-                      fontWeight: 'bold',
-                      fontSize: 16,
-                    }}>
-                    {actionStep[2].number}
-                  </Text>
-                </View>
-                <Text
-                  style={{fontSize: 18, fontWeight: 'bold', color: '#ffffff'}}>
-                  {actionStep[2].title}
-                </Text>
-              </Pressable>
+              <SelectPillowPartButton
+                pillowButtonNumber={actionStep[2].number}
+                pillowButtonText={actionStep[2].title}
+                sendToData={() => handlePresentModalPress(actionStep[2].number)}
+              />
             </View>
 
             <View
@@ -272,119 +177,23 @@ const ControlDeviceScreen = ({navigation}: Props) => {
                 alignItems: 'center',
                 marginBottom: 20,
               }}>
-              <Pressable
-                style={{
-                  flex: 1,
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  paddingVertical: 16,
-                  backgroundColor: '#5B3BC4',
-                  borderWidth: 0.1,
-                  borderColor: '#ffffff',
-                  borderRadius: 10,
-                  marginHorizontal: 5,
-                }}
-                onPress={() => handlePresentModalPress(actionStep[3].number)}>
-                <View
-                  style={{
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    width: 20,
-                    height: 20,
-                    borderRadius: 15,
-                    backgroundColor: '#ffffff',
-                    marginBottom: 10,
-                  }}>
-                  <Text
-                    style={{
-                      color: '#240843',
-                      fontWeight: 'bold',
-                      fontSize: 16,
-                    }}>
-                    {actionStep[3].number}
-                  </Text>
-                </View>
-                <Text
-                  style={{fontSize: 18, fontWeight: 'bold', color: '#ffffff'}}>
-                  {actionStep[3].title}
-                </Text>
-              </Pressable>
+              <SelectPillowPartButton
+                pillowButtonNumber={actionStep[3].number}
+                pillowButtonText={actionStep[3].title}
+                sendToData={() => handlePresentModalPress(actionStep[3].number)}
+              />
 
-              <Pressable
-                style={{
-                  flex: 1,
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  paddingVertical: 16,
-                  backgroundColor: '#5B3BC4',
-                  borderWidth: 0.1,
-                  borderColor: '#ffffff',
-                  borderRadius: 10,
-                  marginHorizontal: 5,
-                }}
-                onPress={() => handlePresentModalPress(actionStep[4].number)}>
-                <View
-                  style={{
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    width: 20,
-                    height: 20,
-                    borderRadius: 15,
-                    backgroundColor: '#ffffff',
-                    marginBottom: 10,
-                  }}>
-                  <Text
-                    style={{
-                      color: '#240843',
-                      fontWeight: 'bold',
-                      fontSize: 16,
-                    }}>
-                    {actionStep[4].number}
-                  </Text>
-                </View>
-                <Text
-                  style={{fontSize: 18, fontWeight: 'bold', color: '#ffffff'}}>
-                  {actionStep[4].title}
-                </Text>
-              </Pressable>
+              <SelectPillowPartButton
+                pillowButtonNumber={actionStep[4].number}
+                pillowButtonText={actionStep[4].title}
+                sendToData={() => handlePresentModalPress(actionStep[4].number)}
+              />
 
-              <Pressable
-                style={{
-                  flex: 1,
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  paddingVertical: 16,
-                  backgroundColor: '#5B3BC4',
-                  borderWidth: 0.1,
-                  borderColor: '#ffffff',
-                  borderRadius: 10,
-                  marginHorizontal: 5,
-                }}
-                onPress={() => handlePresentModalPress(actionStep[5].number)}>
-                <View
-                  style={{
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    width: 20,
-                    height: 20,
-                    borderRadius: 15,
-                    backgroundColor: '#ffffff',
-                    marginBottom: 10,
-                  }}>
-                  <Text
-                    style={{
-                      color: '#240843',
-                      fontWeight: 'bold',
-                      fontSize: 16,
-                    }}>
-                    {actionStep[5].number}
-                  </Text>
-                </View>
-                <Text
-                  style={{fontSize: 18, fontWeight: 'bold', color: '#ffffff'}}>
-                  {actionStep[5].title}
-                </Text>
-              </Pressable>
+              <SelectPillowPartButton
+                pillowButtonNumber={actionStep[5].number}
+                pillowButtonText={actionStep[5].title}
+                sendToData={() => handlePresentModalPress(actionStep[5].number)}
+              />
             </View>
 
             <View
