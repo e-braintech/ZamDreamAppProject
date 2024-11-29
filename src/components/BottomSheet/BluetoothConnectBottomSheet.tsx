@@ -5,16 +5,27 @@ import {Pressable, Text, View} from 'react-native';
 import {Device} from 'react-native-ble-plx';
 import {NativeStackNavigationProp} from 'react-native-screens/lib/typescript/native-stack/types';
 import {connectToDevice} from '../../services';
+import startBluetoothDeviceScan from '../../utils/Bluetooth/startBluetoothDeviceScan';
 
 interface BluetoothConnectBottomSheetProps {
   navigation: NativeStackNavigationProp<ROOT_NAVIGATION, 'ScanDevice'>;
   devices: Device[];
+  isScanning: boolean;
+  setDevices: React.Dispatch<React.SetStateAction<Device[]>>;
+  setIsScanning: React.Dispatch<React.SetStateAction<boolean>>;
   bottomSheetModalRef: React.RefObject<BottomSheetModalMethods>;
 }
 
 const BluetoothConnectBottomSheet: React.FC<
   BluetoothConnectBottomSheetProps
-> = ({navigation, devices, bottomSheetModalRef}) => {
+> = ({
+  navigation,
+  devices,
+  isScanning,
+  setDevices,
+  setIsScanning,
+  bottomSheetModalRef,
+}) => {
   // Logic
   const [isScanComplete, setIsScanComplete] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false); // 연결 상태 관리
@@ -78,6 +89,14 @@ const BluetoothConnectBottomSheet: React.FC<
         // 연결 실패 시 다시 연결 시도
         console.log('연결 재시도 중...');
         setConnectionStatus(null); // 연결 상태 초기화
+        setIsScanComplete(false); // 스캔 완료 상태 초기화
+        setConnectedDeviceId(null); // 연결된 기기 초기화
+        startBluetoothDeviceScan(isScanning, setIsScanning, setDevices);
+
+        // 3초 후 스캔 상태로 전환
+        setTimeout(() => {
+          setIsScanComplete(true);
+        }, 3000);
       } else if (isScanComplete && !connectionStatus) {
         // 스캔 완료 후 연결 시도
         console.log('처음 연결 시도 중...');

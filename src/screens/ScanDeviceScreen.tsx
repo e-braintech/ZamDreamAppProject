@@ -126,6 +126,9 @@ const ScanDeviceScreen = ({navigation}: Props) => {
                 navigation={navigation}
                 devices={devices}
                 bottomSheetModalRef={bottomSheetModalRef}
+                isScanning={isScanning}
+                setDevices={setDevices}
+                setIsScanning={setIsScanning}
               />
             </BottomSheetView>
           </BottomSheetModal>
