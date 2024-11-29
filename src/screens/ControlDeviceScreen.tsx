@@ -47,7 +47,12 @@ const ControlDeviceScreen = ({navigation}: Props) => {
 
   const snapPoints = useMemo(() => ['20%', '60%'], []);
 
-  const {isEnabled, setEnabled} = useSwitchStore();
+  const {isEnabled, toggleSwitch, setEnabled} = useSwitchStore();
+
+  const {isModalVisible, openModal, closeModal} = useModal();
+
+  const {handleSheetPositionChange} =
+    useBottomSheetBackHandler(bottomSheetModalRef);
 
   const batteryImage =
     batteryLevel === 100
@@ -55,11 +60,6 @@ const ControlDeviceScreen = ({navigation}: Props) => {
       : batteryLevel === 50
       ? require('../assets/images/battery50.png')
       : require('../assets/images/battery30.png');
-
-  const {isModalVisible, openModal, closeModal} = useModal();
-
-  const {handleSheetPositionChange} =
-    useBottomSheetBackHandler(bottomSheetModalRef);
 
   const handlePresentModalPress = useCallback((stepNumber: number) => {
     const step = actionStep.find(item => item.number === stepNumber);
@@ -71,27 +71,6 @@ const ControlDeviceScreen = ({navigation}: Props) => {
 
   const hideBottomSheet = () => {
     bottomSheetModalRef.current?.close();
-  };
-
-  const toggleSwitch = () => {
-    setEnabled(!isEnabled);
-  };
-
-  const handleBluetoothReconnect = async () => {
-    await BLEService.manager
-      .cancelDeviceConnection(deviceID)
-      .then(() => {
-        console.log('Connection reset successfully');
-        // setIsModalVisible(false);
-        closeModal();
-        navigation.navigate('ScanDevice');
-      })
-      .catch(error => {
-        console.log('Failed to reset connection:', error);
-        // setIsModalVisible(false);
-        closeModal();
-        navigation.navigate('ScanDevice');
-      });
   };
 
   const sendStoredStepsToDevice = async () => {
@@ -528,7 +507,9 @@ const ControlDeviceScreen = ({navigation}: Props) => {
             <BluetoothDisconnectModal
               visible={isModalVisible}
               onClose={closeModal}
-              handleReconnect={handleBluetoothReconnect}
+              deviceID={deviceID}
+              onCloseModal={closeModal}
+              navigation={navigation}
             />
           </View>
         </SafeAreaView>

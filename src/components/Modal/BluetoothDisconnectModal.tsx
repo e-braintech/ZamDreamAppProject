@@ -1,17 +1,23 @@
 import LottieView from 'lottie-react-native';
 import React from 'react';
 import {Modal, Pressable, Text, View} from 'react-native';
+import {NativeStackNavigationProp} from 'react-native-screens/lib/typescript/native-stack/types';
+import reconnnectBluetoothDevice from '../../utils/Bluetooth/reconnectBluetoothDevice';
 
 interface BluetoothDisconnectModalProps {
   visible: boolean;
+  deviceID: string;
   onClose: () => void;
-  handleReconnect: () => void;
+  onCloseModal: () => void;
+  navigation: NativeStackNavigationProp<ROOT_NAVIGATION, 'ScanDevice'>;
 }
 
 const BluetoothDisconnectModal: React.FC<BluetoothDisconnectModalProps> = ({
   visible,
+  deviceID,
   onClose,
-  handleReconnect,
+  onCloseModal,
+  navigation,
 }) => {
   // Logic
 
@@ -71,7 +77,9 @@ const BluetoothDisconnectModal: React.FC<BluetoothDisconnectModalProps> = ({
               backgroundColor: '#371B9E',
               borderRadius: 30,
             }}
-            onPress={handleReconnect}>
+            onPress={() =>
+              reconnnectBluetoothDevice(deviceID, onCloseModal, navigation)
+            }>
             <Text style={{fontSize: 20, fontWeight: 'bold', color: '#ffffff'}}>
               확인
             </Text>
