@@ -15,7 +15,7 @@ import batteryState from '../data/batteryState';
 import {useBottomSheetBackHandler} from '../hooks/useBottomSheetBackHandler';
 import useModal from '../hooks/useModal';
 import ActionStepType from '../types/ActionStepType';
-import loadStoredPillowInitialStepData from '../utils/Bluetooth/loadStoredPillowInitialStepDataStoredPillowInitialStepData';
+import loadStoredPillowInitialStepData from '../utils/Bluetooth/loadStoredPillowInitialStepData';
 import requestBatteryLevel from '../utils/Bluetooth/requestBatteryLevel';
 import requestFanTurnOff from '../utils/Bluetooth/requestFanTurnOff';
 import {useSwitchStore} from '../utils/zustand/store';
