@@ -11,7 +11,6 @@ import {NativeStackScreenProps} from 'react-native-screens/lib/typescript/native
 import BluetoothControlBottomSheet from '../components/BottomSheet/BluetoothControlBottomSheet';
 import BottomSheetBackdropHandler from '../components/BottomSheet/BottomSheetBackdropHandler';
 import BluetoothDisconnectModal from '../components/Modal/BluetoothDisconnectModal';
-import aromaStep from '../data/aromaStep';
 import batteryState from '../data/batteryState';
 import {characteristic_UUID, service_UUID} from '../data/uuids';
 import {useBottomSheetBackHandler} from '../hooks/useBottomSheetBackHandler';
@@ -20,6 +19,7 @@ import {BLEService} from '../services/BLEService';
 import ActionStepType from '../types/ActionStepType';
 import getPillowInitialStepData from '../utils/Bluetooth/getPillowInitialStepData';
 import requestBatteryLevel from '../utils/Bluetooth/requestBatteryLevel';
+import requestFanTurnOff from '../utils/Bluetooth/requestFanTurnOff';
 import {encodeToBase64} from '../utils/common';
 import {loadStepLevel} from '../utils/storage/storage';
 import {useSwitchStore} from '../utils/zustand/store';
@@ -156,37 +156,9 @@ const ControlDeviceScreen = ({navigation}: Props) => {
     }
   };
 
-  const sendFanTurnOff = async () => {
-    const data = encodeToBase64(aromaStep.turn_off);
-
-    try {
-      if (!deviceID) {
-        console.log('No connected device found');
-        return;
-      }
-
-      const isConnected = await BLEService.manager.isDeviceConnected(deviceID);
-      if (!isConnected) {
-        console.log('Device is not connected. Reconnecting...');
-        await BLEService.manager.connectToDevice(deviceID);
-      }
-
-      await BLEService.manager.writeCharacteristicWithResponseForDevice(
-        deviceID,
-        service_UUID,
-        characteristic_UUID,
-        data,
-      );
-
-      console.log('Smell turn off value sent to server');
-    } catch (error) {
-      console.log('Failed to send smell turn off value:', error);
-    }
-  };
-
   useEffect(() => {
     if (!isEnabled) {
-      sendFanTurnOff();
+      requestFanTurnOff(deviceID);
     }
   }, [isEnabled]);
 
