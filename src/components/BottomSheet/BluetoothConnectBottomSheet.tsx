@@ -4,8 +4,7 @@ import React, {useEffect, useState} from 'react';
 import {Pressable, Text, View} from 'react-native';
 import {Device} from 'react-native-ble-plx';
 import {NativeStackNavigationProp} from 'react-native-screens/lib/typescript/native-stack/types';
-import {connectToDevice} from '../../services';
-import startBluetoothDeviceScan from '../../utils/Bluetooth/startBluetoothDeviceScan';
+import connectBluetoothDevice from '../../utils/Bluetooth/connectBluetoothDevice';
 
 interface BluetoothConnectBottomSheetProps {
   navigation: NativeStackNavigationProp<ROOT_NAVIGATION, 'ScanDevice'>;
@@ -79,41 +78,6 @@ const BluetoothConnectBottomSheet: React.FC<
       ? '#371B9E' // 파란색 (스캔 완료)
       : '#C7C7E8'; // 회색 (스캔 중)
 
-  const handleBluetoothConnect = async () => {
-    if (isScanComplete && !isConnecting) {
-      if (connectionStatus === 'success' && connectedDeviceId) {
-        // 연결 성공 시 상세 화면으로 이동
-        bottomSheetModalRef.current?.close();
-        navigation.navigate('ControlDevice', {deviceID: connectedDeviceId});
-      } else if (connectionStatus === 'fail') {
-        // 연결 실패 시 다시 연결 시도
-        console.log('연결 재시도 중...');
-        setConnectionStatus(null); // 연결 상태 초기화
-        setIsScanComplete(false); // 스캔 완료 상태 초기화
-        setConnectedDeviceId(null); // 연결된 기기 초기화
-        startBluetoothDeviceScan(isScanning, setIsScanning, setDevices);
-
-        // 3초 후 스캔 상태로 전환
-        setTimeout(() => {
-          setIsScanComplete(true);
-        }, 3000);
-      } else if (isScanComplete && !connectionStatus) {
-        // 스캔 완료 후 연결 시도
-        console.log('처음 연결 시도 중...');
-        await connectToDevice(
-          devices,
-          setConnectionStatus,
-          setIsConnecting,
-          setConnectedDeviceId,
-        );
-      } else {
-        console.log('아직 준비가 완료되지 않았습니다.');
-      }
-    } else {
-      console.log('스캔 중이거나 연결 중입니다.');
-    }
-  };
-
   useEffect(() => {
     // 3초 후 스캔 완료 상태로 변경
     const timer = setTimeout(() => {
@@ -171,7 +135,24 @@ const BluetoothConnectBottomSheet: React.FC<
           borderRadius: 30,
           marginTop: 50,
         }}
-        onPress={handleBluetoothConnect}>
+        onPress={() =>
+          connectBluetoothDevice(
+            devices,
+            isScanning,
+            isScanComplete,
+            isConnecting,
+            connectionStatus,
+            connectedDeviceId,
+            bottomSheetModalRef,
+            navigation,
+            setDevices,
+            setIsConnecting,
+            setIsScanning,
+            setConnectionStatus,
+            setConnectedDeviceId,
+            setIsScanComplete,
+          )
+        }>
         <Text style={{fontSize: 20, fontWeight: 'bold', color: '#ffffff'}}>
           {buttonText}
         </Text>
