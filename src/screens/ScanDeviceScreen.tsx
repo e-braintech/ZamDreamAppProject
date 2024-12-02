@@ -70,13 +70,16 @@ const ScanDeviceScreen = ({navigation}: Props) => {
 
   return (
     <BottomSheetModalProvider>
-      <SafeAreaView style={{flex: 1, backgroundColor: 'transparent'}}>
-        <ImageBackground
-          source={source}
+      <ImageBackground
+        source={source}
+        style={{
+          flex: 1,
+          paddingHorizontal: 32,
+        }}>
+        <SafeAreaView
           style={{
             flex: 1,
             justifyContent: 'space-between',
-            paddingHorizontal: 32,
           }}>
           <LottieView
             source={require('../assets/lottie/BI.json')}
@@ -132,9 +135,9 @@ const ScanDeviceScreen = ({navigation}: Props) => {
               />
             </BottomSheetView>
           </BottomSheetModal>
-        </ImageBackground>
+        </SafeAreaView>
         <BluetoothConnectModal visible={isModalVisible} onClose={closeModal} />
-      </SafeAreaView>
+      </ImageBackground>
     </BottomSheetModalProvider>
   );
 };
