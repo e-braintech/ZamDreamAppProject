@@ -4,7 +4,7 @@ import {NativeStackNavigationProp} from 'react-native-screens/lib/typescript/nat
 import {connectToDevice} from '../../services';
 import startBluetoothDeviceScan from './startBluetoothDeviceScan';
 
-const connectBluetoothDevice = async (
+const scanBluetoothDevice = async (
   devices: Device[],
   isScanning: boolean,
   isScanComplete: boolean,
@@ -56,4 +56,4 @@ const connectBluetoothDevice = async (
   }
 };
 
-export default connectBluetoothDevice;
+export default scanBluetoothDevice;

@@ -4,7 +4,7 @@ import React, {useEffect, useState} from 'react';
 import {Pressable, Text, View} from 'react-native';
 import {Device} from 'react-native-ble-plx';
 import {NativeStackNavigationProp} from 'react-native-screens/lib/typescript/native-stack/types';
-import connectBluetoothDevice from '../../utils/Bluetooth/connectBluetoothDevice';
+import scanBluetoothDevice from '../../utils/Bluetooth/scanBluetoothDevice';
 
 interface BluetoothConnectBottomSheetProps {
   navigation: NativeStackNavigationProp<ROOT_NAVIGATION, 'ScanDevice'>;
@@ -136,7 +136,7 @@ const BluetoothConnectBottomSheet: React.FC<
           marginTop: 50,
         }}
         onPress={() =>
-          connectBluetoothDevice(
+          scanBluetoothDevice(
             devices,
             isScanning,
             isScanComplete,
