@@ -1,51 +1,24 @@
 import {
-  BottomSheetBackdrop,
   BottomSheetModal,
   BottomSheetModalProvider,
   BottomSheetView,
 } from '@gorhom/bottom-sheet';
 import {RouteProp, useFocusEffect, useRoute} from '@react-navigation/native';
 import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
-import {Image, Pressable, SafeAreaView, Switch, Text, View} from 'react-native';
+import {Image, SafeAreaView, Switch, Text, View} from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import {NativeStackScreenProps} from 'react-native-screens/lib/typescript/native-stack/types';
-import BluetoothControlBottomSheet from '../components/BluetoothControlBottomSheet';
-import BluetoothDisconnectModal from '../components/BluetoothDisconnectModal';
-import {
-  batteryValue,
-  set_head_step_1,
-  set_head_step_2,
-  set_head_step_3,
-  set_head_step_4,
-  set_head_step_5,
-  set_left_head_step_1,
-  set_left_head_step_2,
-  set_left_head_step_3,
-  set_left_head_step_4,
-  set_left_head_step_5,
-  set_neck_step_1,
-  set_neck_step_2,
-  set_neck_step_3,
-  set_neck_step_4,
-  set_neck_step_5,
-  set_right_head_step_1,
-  set_right_head_step_2,
-  set_right_head_step_3,
-  set_right_head_step_4,
-  set_right_head_step_5,
-  set_shoulder_step_1,
-  set_shoulder_step_2,
-  set_shoulder_step_3,
-  set_shoulder_step_4,
-  set_shoulder_step_5,
-  smell_turn_off,
-} from '../data/actions';
-import {characteristic_UUID, notify_UUID, service_UUID} from '../data/uuids';
+import BluetoothControlBottomSheet from '../components/BottomSheet/BluetoothControlBottomSheet';
+import BottomSheetBackdropHandler from '../components/BottomSheet/BottomSheetBackdropHandler';
+import SelectPillowPartButton from '../components/Button/SelectPillowPartButton';
+import BluetoothDisconnectModal from '../components/Modal/BluetoothDisconnectModal';
+import batteryState from '../data/batteryState';
 import {useBottomSheetBackHandler} from '../hooks/useBottomSheetBackHandler';
-import {BLEService} from '../services/BLEService';
-import {ActionStepType} from '../types/types';
-import {charToDecimal, decodeFromBase64, encodeToBase64} from '../utils/common';
-import {loadStepLevel} from '../utils/storage/storage';
+import useModal from '../hooks/useModal';
+import ActionStepType from '../types/ActionStepType';
+import requestBluetoothDeviceBatteryLevel from '../utils/bluetooth/requestBluetoothDeviceBatteryLevel';
+import requestBluetoothDeviceFanTurnOff from '../utils/bluetooth/requestBluetoothDeviceFanTurnOff';
+import loadStoredPillowInitialStepData from '../utils/storage/loadStoredPillowInitialStepData';
 import {useSwitchStore} from '../utils/zustand/store';
 
 type Props = NativeStackScreenProps<ROOT_NAVIGATION, 'ScanDevice'>;
@@ -66,27 +39,24 @@ const ControlDeviceScreen = ({navigation}: Props) => {
   const {deviceID} = route.params; // 전달받은 기기 데이터
   const [selectedStep, setSelectedStep] = useState<ActionStepType | null>(null);
   const [batteryLevel, setBatteryLevel] = useState<number | null>(null); // 배터리 레벨을 저장하는 상태
-  const [modalVisible, setIsModalVisible] = useState<boolean>(false);
 
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
 
   const snapPoints = useMemo(() => ['20%', '60%'], []);
 
-  const {isEnabled, setEnabled} = useSwitchStore();
+  const {isEnabled, toggleSwitch, setEnabled} = useSwitchStore();
 
-  const batteryImage =
-    batteryLevel === 100
-      ? require('../assets/battery100.png')
-      : batteryLevel === 50
-      ? require('../assets/battery50.png')
-      : require('../assets/battery30.png');
-
-  const handleCloseModal = () => {
-    setIsModalVisible(false);
-  };
+  const {isModalVisible, openModal, closeModal} = useModal();
 
   const {handleSheetPositionChange} =
     useBottomSheetBackHandler(bottomSheetModalRef);
+
+  const batteryImage =
+    batteryLevel === 100
+      ? require('../assets/images/battery100.png')
+      : batteryLevel === 50
+      ? require('../assets/images/battery50.png')
+      : require('../assets/images/battery30.png');
 
   const handlePresentModalPress = useCallback((stepNumber: number) => {
     const step = actionStep.find(item => item.number === stepNumber);
@@ -96,258 +66,28 @@ const ControlDeviceScreen = ({navigation}: Props) => {
     }
   }, []);
 
-  const renderBackdrop = useCallback(
-    (props: any) => <BottomSheetBackdrop {...props} pressBehavior="close" />,
-    [],
-  );
-
   const hideBottomSheet = () => {
     bottomSheetModalRef.current?.close();
   };
 
-  const toggleSwitch = () => {
-    setEnabled(!isEnabled);
-  };
-
-  const getBluetoothData = (part: string, stepLevel: number): string | null => {
-    switch (part) {
-      case 'shoulder':
-        return stepLevel === 1
-          ? set_shoulder_step_1
-          : stepLevel === 2
-          ? set_shoulder_step_2
-          : stepLevel === 3
-          ? set_shoulder_step_3
-          : stepLevel === 4
-          ? set_shoulder_step_4
-          : set_shoulder_step_5;
-      case 'neck':
-        return stepLevel === 1
-          ? set_neck_step_1
-          : stepLevel === 2
-          ? set_neck_step_2
-          : stepLevel === 3
-          ? set_neck_step_3
-          : stepLevel === 4
-          ? set_neck_step_4
-          : set_neck_step_5;
-      case 'head':
-        return stepLevel === 1
-          ? set_head_step_1
-          : stepLevel === 2
-          ? set_head_step_2
-          : stepLevel === 3
-          ? set_head_step_3
-          : stepLevel === 4
-          ? set_head_step_4
-          : set_head_step_5;
-      case 'rightHead':
-        return stepLevel === 1
-          ? set_right_head_step_1
-          : stepLevel === 2
-          ? set_right_head_step_2
-          : stepLevel === 3
-          ? set_right_head_step_3
-          : stepLevel === 4
-          ? set_right_head_step_4
-          : set_right_head_step_5;
-      case 'leftHead':
-        return stepLevel === 1
-          ? set_left_head_step_1
-          : stepLevel === 2
-          ? set_left_head_step_2
-          : stepLevel === 3
-          ? set_left_head_step_3
-          : stepLevel === 4
-          ? set_left_head_step_4
-          : set_left_head_step_5;
-      default:
-        return null;
-    }
-  };
-
-  const handleBluetoothReconnect = async () => {
-    await BLEService.manager
-      .cancelDeviceConnection(deviceID)
-      .then(() => {
-        console.log('Connection reset successfully');
-        setIsModalVisible(false);
-        navigation.navigate('ScanDevice');
-      })
-      .catch(error => {
-        console.log('Failed to reset connection:', error);
-        setIsModalVisible(false);
-        navigation.navigate('ScanDevice');
-      });
-  };
-
-  const sendStoredStepsToDevice = async () => {
-    const parts = ['shoulder', 'neck', 'head', 'rightHead', 'leftHead'];
-
-    parts.forEach(part => {
-      const stepLevel = loadStepLevel(part);
-      const data = getBluetoothData(part, stepLevel);
-
-      if (data) {
-        sendDataToDevice(data, part, stepLevel); // 부위, 단계, 데이터를 함께 전송
-      }
-    });
-  };
-
-  // 데이터를 블루투스 기기로 보내는 함수
-  const sendDataToDevice = async (
-    data: string,
-    part: string,
-    stepLevel: number,
-  ) => {
-    console.log(data);
-
-    try {
-      const base64Data = encodeToBase64(data);
-
-      if (!deviceID) {
-        console.log('No connected device found');
-        setIsModalVisible(!modalVisible);
-        return;
-      }
-
-      // 연결 상태 확인
-      const isConnected = await BLEService.manager.isDeviceConnected(deviceID);
-      if (!isConnected) {
-        console.log('Device is not connected. Reconnecting...');
-        await BLEService.manager.connectToDevice(deviceID).catch(() => {
-          setIsModalVisible(!modalVisible);
-          return;
-        });
-      }
-
-      BLEService.manager
-        .writeCharacteristicWithResponseForDevice(
-          deviceID,
-          service_UUID,
-          characteristic_UUID,
-          base64Data,
-        )
-        .then(res => {
-          console.log(
-            `Data sent successfully for ${part} at level ${stepLevel}`,
-          );
-          // console.log('Data sent: ', JSON.stringify(res, null, 5));
-        })
-        .catch(err => {
-          // console.log('Error sending data:', err)
-          return;
-        });
-    } catch (error) {
-      console.log('Failed to send data:', error);
-    }
-  };
-
-  // 배터리 측정 요청을 보내는 함수
-  const requestBatteryLevel = async () => {
-    try {
-      if (!deviceID) {
-        console.log('No connected device found');
-        return;
-      }
-
-      // 연결 상태 확인 및 재연결
-      const isConnected = await BLEService.manager.isDeviceConnected(deviceID);
-      if (!isConnected) {
-        console.log('Device is not connected. Reconnecting...');
-        await BLEService.manager.connectToDevice(deviceID).catch(() => {
-          setIsModalVisible(!modalVisible);
-          return;
-        });
-      }
-
-      // 서비스 및 특성 검색
-      await BLEService.manager.discoverAllServicesAndCharacteristicsForDevice(
-        deviceID,
-      );
-
-      // 배터리 요청 데이터 생성 (기기 문서를 참조해 데이터 형식 확인 필요)
-      const base64Data = encodeToBase64(batteryValue); // 요청 데이터 변경 필요
-
-      // 배터리 요청 전송
-      await BLEService.manager.writeCharacteristicWithResponseForDevice(
-        deviceID,
-        service_UUID, // 배터리 서비스 UUID
-        characteristic_UUID, // 배터리 요청 특성 UUID
-        base64Data,
-      );
-
-      console.log('Battery level request sent.');
-
-      // 배터리 응답 모니터링
-      BLEService.manager.monitorCharacteristicForDevice(
-        deviceID,
-        service_UUID, // 배터리 Notify 서비스 UUID
-        notify_UUID, // 배터리 Notify 특성 UUID
-        (error, characteristic) => {
-          if (error) {
-            console.log('Failed to monitor characteristic:', error);
-            setIsModalVisible(true);
-            // resetAndNavigateToScanScreen(deviceID, navigation);
-            return;
-          }
-
-          if (characteristic?.value) {
-            console.log(characteristic.value);
-            const decodedValue = decodeFromBase64(characteristic.value);
-            const targetCharValue = decodedValue[3];
-            const decimalValue = charToDecimal(targetCharValue);
-            console.log(`Battery Data: ${decimalValue}`);
-            setBatteryLevel(decimalValue);
-          }
-        },
-      );
-    } catch (error) {
-      console.log('Failed to request battery level:', error);
-    }
-  };
-
-  const sendFanTurnOff = async () => {
-    const data = encodeToBase64(smell_turn_off);
-
-    try {
-      if (!deviceID) {
-        console.log('No connected device found');
-        return;
-      }
-
-      const isConnected = await BLEService.manager.isDeviceConnected(deviceID);
-      if (!isConnected) {
-        console.log('Device is not connected. Reconnecting...');
-        await BLEService.manager.connectToDevice(deviceID);
-      }
-
-      await BLEService.manager.writeCharacteristicWithResponseForDevice(
-        deviceID,
-        service_UUID,
-        characteristic_UUID,
-        data,
-      );
-
-      console.log('Smell turn off value sent to server');
-    } catch (error) {
-      console.log('Failed to send smell turn off value:', error);
-    }
-  };
-
   useEffect(() => {
     if (!isEnabled) {
-      sendFanTurnOff();
+      requestBluetoothDeviceFanTurnOff(deviceID, openModal);
     }
   }, [isEnabled]);
 
   useEffect(() => {
-    sendStoredStepsToDevice();
+    loadStoredPillowInitialStepData(deviceID, openModal);
   }, []);
 
   useFocusEffect(
     React.useCallback(() => {
-      requestBatteryLevel();
+      requestBluetoothDeviceBatteryLevel(
+        deviceID,
+        batteryState,
+        openModal,
+        setBatteryLevel,
+      );
     }, [batteryLevel]),
   );
 
@@ -401,7 +141,7 @@ const ControlDeviceScreen = ({navigation}: Props) => {
             )}
 
             <Image
-              source={require('../assets/pilow.png')}
+              source={require('../assets/images/pilow.png')}
               style={{
                 maxWidth: '100%',
                 maxHeight: '40%',
@@ -416,119 +156,23 @@ const ControlDeviceScreen = ({navigation}: Props) => {
                 alignItems: 'center',
                 marginBottom: 20,
               }}>
-              <Pressable
-                style={{
-                  flex: 1,
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  paddingVertical: 16,
-                  backgroundColor: '#5B3BC4',
-                  borderWidth: 0.1,
-                  borderColor: '#ffffff',
-                  borderRadius: 10,
-                  marginHorizontal: 5,
-                }}
-                onPress={() => handlePresentModalPress(actionStep[0].number)}>
-                <View
-                  style={{
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    width: 20,
-                    height: 20,
-                    borderRadius: 15,
-                    backgroundColor: '#ffffff',
-                    marginBottom: 10,
-                  }}>
-                  <Text
-                    style={{
-                      color: '#240843',
-                      fontWeight: 'bold',
-                      fontSize: 16,
-                    }}>
-                    {actionStep[0].number}
-                  </Text>
-                </View>
-                <Text
-                  style={{fontSize: 18, fontWeight: 'bold', color: '#ffffff'}}>
-                  {actionStep[0].title}
-                </Text>
-              </Pressable>
+              <SelectPillowPartButton
+                pillowButtonNumber={actionStep[0].number}
+                pillowButtonText={actionStep[0].title}
+                sendToData={() => handlePresentModalPress(actionStep[0].number)}
+              />
 
-              <Pressable
-                style={{
-                  flex: 1,
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  paddingVertical: 16,
-                  backgroundColor: '#5B3BC4',
-                  borderWidth: 0.1,
-                  borderColor: '#ffffff',
-                  borderRadius: 10,
-                  marginHorizontal: 5,
-                }}
-                onPress={() => handlePresentModalPress(actionStep[1].number)}>
-                <View
-                  style={{
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    width: 20,
-                    height: 20,
-                    borderRadius: 15,
-                    backgroundColor: '#ffffff',
-                    marginBottom: 10,
-                  }}>
-                  <Text
-                    style={{
-                      color: '#240843',
-                      fontWeight: 'bold',
-                      fontSize: 16,
-                    }}>
-                    {actionStep[1].number}
-                  </Text>
-                </View>
-                <Text
-                  style={{fontSize: 18, fontWeight: 'bold', color: '#ffffff'}}>
-                  {actionStep[1].title}
-                </Text>
-              </Pressable>
+              <SelectPillowPartButton
+                pillowButtonNumber={actionStep[1].number}
+                pillowButtonText={actionStep[1].title}
+                sendToData={() => handlePresentModalPress(actionStep[1].number)}
+              />
 
-              <Pressable
-                style={{
-                  flex: 1,
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  paddingVertical: 16,
-                  backgroundColor: '#5B3BC4',
-                  borderWidth: 0.1,
-                  borderColor: '#ffffff',
-                  borderRadius: 10,
-                  marginHorizontal: 5,
-                }}
-                onPress={() => handlePresentModalPress(actionStep[2].number)}>
-                <View
-                  style={{
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    width: 20,
-                    height: 20,
-                    borderRadius: 15,
-                    backgroundColor: '#ffffff',
-                    marginBottom: 10,
-                  }}>
-                  <Text
-                    style={{
-                      color: '#240843',
-                      fontWeight: 'bold',
-                      fontSize: 16,
-                    }}>
-                    {actionStep[2].number}
-                  </Text>
-                </View>
-                <Text
-                  style={{fontSize: 18, fontWeight: 'bold', color: '#ffffff'}}>
-                  {actionStep[2].title}
-                </Text>
-              </Pressable>
+              <SelectPillowPartButton
+                pillowButtonNumber={actionStep[2].number}
+                pillowButtonText={actionStep[2].title}
+                sendToData={() => handlePresentModalPress(actionStep[2].number)}
+              />
             </View>
 
             <View
@@ -538,119 +182,23 @@ const ControlDeviceScreen = ({navigation}: Props) => {
                 alignItems: 'center',
                 marginBottom: 20,
               }}>
-              <Pressable
-                style={{
-                  flex: 1,
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  paddingVertical: 16,
-                  backgroundColor: '#5B3BC4',
-                  borderWidth: 0.1,
-                  borderColor: '#ffffff',
-                  borderRadius: 10,
-                  marginHorizontal: 5,
-                }}
-                onPress={() => handlePresentModalPress(actionStep[3].number)}>
-                <View
-                  style={{
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    width: 20,
-                    height: 20,
-                    borderRadius: 15,
-                    backgroundColor: '#ffffff',
-                    marginBottom: 10,
-                  }}>
-                  <Text
-                    style={{
-                      color: '#240843',
-                      fontWeight: 'bold',
-                      fontSize: 16,
-                    }}>
-                    {actionStep[3].number}
-                  </Text>
-                </View>
-                <Text
-                  style={{fontSize: 18, fontWeight: 'bold', color: '#ffffff'}}>
-                  {actionStep[3].title}
-                </Text>
-              </Pressable>
+              <SelectPillowPartButton
+                pillowButtonNumber={actionStep[3].number}
+                pillowButtonText={actionStep[3].title}
+                sendToData={() => handlePresentModalPress(actionStep[3].number)}
+              />
 
-              <Pressable
-                style={{
-                  flex: 1,
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  paddingVertical: 16,
-                  backgroundColor: '#5B3BC4',
-                  borderWidth: 0.1,
-                  borderColor: '#ffffff',
-                  borderRadius: 10,
-                  marginHorizontal: 5,
-                }}
-                onPress={() => handlePresentModalPress(actionStep[4].number)}>
-                <View
-                  style={{
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    width: 20,
-                    height: 20,
-                    borderRadius: 15,
-                    backgroundColor: '#ffffff',
-                    marginBottom: 10,
-                  }}>
-                  <Text
-                    style={{
-                      color: '#240843',
-                      fontWeight: 'bold',
-                      fontSize: 16,
-                    }}>
-                    {actionStep[4].number}
-                  </Text>
-                </View>
-                <Text
-                  style={{fontSize: 18, fontWeight: 'bold', color: '#ffffff'}}>
-                  {actionStep[4].title}
-                </Text>
-              </Pressable>
+              <SelectPillowPartButton
+                pillowButtonNumber={actionStep[4].number}
+                pillowButtonText={actionStep[4].title}
+                sendToData={() => handlePresentModalPress(actionStep[4].number)}
+              />
 
-              <Pressable
-                style={{
-                  flex: 1,
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  paddingVertical: 16,
-                  backgroundColor: '#5B3BC4',
-                  borderWidth: 0.1,
-                  borderColor: '#ffffff',
-                  borderRadius: 10,
-                  marginHorizontal: 5,
-                }}
-                onPress={() => handlePresentModalPress(actionStep[5].number)}>
-                <View
-                  style={{
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    width: 20,
-                    height: 20,
-                    borderRadius: 15,
-                    backgroundColor: '#ffffff',
-                    marginBottom: 10,
-                  }}>
-                  <Text
-                    style={{
-                      color: '#240843',
-                      fontWeight: 'bold',
-                      fontSize: 16,
-                    }}>
-                    {actionStep[5].number}
-                  </Text>
-                </View>
-                <Text
-                  style={{fontSize: 18, fontWeight: 'bold', color: '#ffffff'}}>
-                  {actionStep[5].title}
-                </Text>
-              </Pressable>
+              <SelectPillowPartButton
+                pillowButtonNumber={actionStep[5].number}
+                pillowButtonText={actionStep[5].title}
+                sendToData={() => handlePresentModalPress(actionStep[5].number)}
+              />
             </View>
 
             <View
@@ -682,7 +230,7 @@ const ControlDeviceScreen = ({navigation}: Props) => {
               index={2}
               snapPoints={snapPoints}
               enablePanDownToClose={true}
-              backdropComponent={renderBackdrop}
+              backdropComponent={BottomSheetBackdropHandler}
               onChange={handleSheetPositionChange}
               handleStyle={{backgroundColor: '#F3F1FF', borderRadius: 50}}
               handleIndicatorStyle={{
@@ -705,9 +253,11 @@ const ControlDeviceScreen = ({navigation}: Props) => {
             </BottomSheetModal>
 
             <BluetoothDisconnectModal
-              visible={modalVisible}
-              onClose={handleCloseModal}
-              handleReconnect={handleBluetoothReconnect}
+              visible={isModalVisible}
+              onClose={closeModal}
+              deviceID={deviceID}
+              onCloseModal={closeModal}
+              navigation={navigation}
             />
           </View>
         </SafeAreaView>

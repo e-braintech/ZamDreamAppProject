@@ -10,7 +10,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import {BLEService} from '../services/BLEService';
+import {BLEService} from '../../services/BLEService';
 
 interface BluetoothConnectModalProps {
   visible: boolean;
@@ -65,7 +65,7 @@ const BluetoothConnectModal: React.FC<BluetoothConnectModalProps> = ({
           }}>
           <TouchableOpacity style={{alignSelf: 'flex-end'}} onPress={onClose}>
             <Image
-              source={require('../assets/close.png')}
+              source={require('../../assets/images/close.png')}
               style={{
                 width: 20,
                 height: 20,
@@ -75,7 +75,7 @@ const BluetoothConnectModal: React.FC<BluetoothConnectModalProps> = ({
           </TouchableOpacity>
 
           <LottieView
-            source={require('../assets/lottie/bluetooth.json')}
+            source={require('../../assets/lottie/bluetooth.json')}
             style={{
               width: 100,
               height: 100,

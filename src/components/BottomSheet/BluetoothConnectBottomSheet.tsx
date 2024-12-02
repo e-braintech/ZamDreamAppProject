@@ -4,17 +4,27 @@ import React, {useEffect, useState} from 'react';
 import {Pressable, Text, View} from 'react-native';
 import {Device} from 'react-native-ble-plx';
 import {NativeStackNavigationProp} from 'react-native-screens/lib/typescript/native-stack/types';
-import {connectToDevice} from '../services';
+import scanBluetoothDevice from '../../utils/bluetooth/scanBluetoothDevice';
 
 interface BluetoothConnectBottomSheetProps {
   navigation: NativeStackNavigationProp<ROOT_NAVIGATION, 'ScanDevice'>;
   devices: Device[];
+  isScanning: boolean;
+  setDevices: React.Dispatch<React.SetStateAction<Device[]>>;
+  setIsScanning: React.Dispatch<React.SetStateAction<boolean>>;
   bottomSheetModalRef: React.RefObject<BottomSheetModalMethods>;
 }
 
 const BluetoothConnectBottomSheet: React.FC<
   BluetoothConnectBottomSheetProps
-> = ({navigation, devices, bottomSheetModalRef}) => {
+> = ({
+  navigation,
+  devices,
+  isScanning,
+  setDevices,
+  setIsScanning,
+  bottomSheetModalRef,
+}) => {
   // Logic
   const [isScanComplete, setIsScanComplete] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false); // 연결 상태 관리
@@ -45,12 +55,12 @@ const BluetoothConnectBottomSheet: React.FC<
 
   const source =
     connectionStatus === 'success'
-      ? require('../assets/lottie/connect.json')
+      ? require('../../assets/lottie/connect.json')
       : connectionStatus === 'fail'
-      ? require('../assets/lottie/fail.json')
+      ? require('../../assets/lottie/fail.json')
       : isScanComplete
-      ? require('../assets/lottie/find.json')
-      : require('../assets/lottie/search.json');
+      ? require('../../assets/lottie/find.json')
+      : require('../../assets/lottie/search.json');
 
   const buttonText =
     connectionStatus === 'success'
@@ -67,33 +77,6 @@ const BluetoothConnectBottomSheet: React.FC<
       : isScanComplete
       ? '#371B9E' // 파란색 (스캔 완료)
       : '#C7C7E8'; // 회색 (스캔 중)
-
-  const handleBluetoothConnect = async () => {
-    if (isScanComplete && !isConnecting) {
-      if (connectionStatus === 'success' && connectedDeviceId) {
-        // 연결 성공 시 상세 화면으로 이동
-        bottomSheetModalRef.current?.close();
-        navigation.navigate('ControlDevice', {deviceID: connectedDeviceId});
-      } else if (connectionStatus === 'fail') {
-        // 연결 실패 시 다시 연결 시도
-        console.log('연결 재시도 중...');
-        setConnectionStatus(null); // 연결 상태 초기화
-      } else if (isScanComplete && !connectionStatus) {
-        // 스캔 완료 후 연결 시도
-        console.log('처음 연결 시도 중...');
-        await connectToDevice(
-          devices,
-          setConnectionStatus,
-          setIsConnecting,
-          setConnectedDeviceId,
-        );
-      } else {
-        console.log('아직 준비가 완료되지 않았습니다.');
-      }
-    } else {
-      console.log('스캔 중이거나 연결 중입니다.');
-    }
-  };
 
   useEffect(() => {
     // 3초 후 스캔 완료 상태로 변경
@@ -152,7 +135,24 @@ const BluetoothConnectBottomSheet: React.FC<
           borderRadius: 30,
           marginTop: 50,
         }}
-        onPress={handleBluetoothConnect}>
+        onPress={() =>
+          scanBluetoothDevice(
+            devices,
+            isScanning,
+            isScanComplete,
+            isConnecting,
+            connectionStatus,
+            connectedDeviceId,
+            bottomSheetModalRef,
+            navigation,
+            setDevices,
+            setIsConnecting,
+            setIsScanning,
+            setConnectionStatus,
+            setConnectedDeviceId,
+            setIsScanComplete,
+          )
+        }>
         <Text style={{fontSize: 20, fontWeight: 'bold', color: '#ffffff'}}>
           {buttonText}
         </Text>
