@@ -93,8 +93,6 @@ const BluetoothControlBottomSheet: React.FC<
         return 'rightHead';
       case 5:
         return 'leftHead';
-      case 6:
-        return 'smell';
       default:
         return '';
     }
