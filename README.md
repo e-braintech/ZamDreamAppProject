@@ -18,7 +18,6 @@
 - TypeScript
 - [React Navigation](https://reactnavigation.org/)
   - [Stack](https://reactnavigation.org/docs/stack-navigator/)
-  - [Bottom-Tab](https://reactnavigation.org/docs/bottom-tab-navigator/)
 - BLE
   - [react-native-ble-plx](https://github.com/dotintent/react-native-ble-plx)
   - [react-native-ble-manager](https://github.com/innoveit/react-native-ble-manager)
