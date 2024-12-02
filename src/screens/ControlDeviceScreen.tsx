@@ -16,9 +16,9 @@ import batteryState from '../data/batteryState';
 import {useBottomSheetBackHandler} from '../hooks/useBottomSheetBackHandler';
 import useModal from '../hooks/useModal';
 import ActionStepType from '../types/ActionStepType';
-import loadStoredPillowInitialStepData from '../utils/Bluetooth/loadStoredPillowInitialStepData';
-import requestBatteryLevel from '../utils/Bluetooth/requestBatteryLevel';
-import requestFanTurnOff from '../utils/Bluetooth/requestFanTurnOff';
+import requestBluetoothDeviceBatteryLevel from '../utils/bluetooth/requestBluetoothDeviceBatteryLevel';
+import requestBluetoothDeviceFanTurnOff from '../utils/bluetooth/requestBluetoothDeviceFanTurnOff';
+import loadStoredPillowInitialStepData from '../utils/storage/loadStoredPillowInitialStepData';
 import {useSwitchStore} from '../utils/zustand/store';
 
 type Props = NativeStackScreenProps<ROOT_NAVIGATION, 'ScanDevice'>;
@@ -72,7 +72,7 @@ const ControlDeviceScreen = ({navigation}: Props) => {
 
   useEffect(() => {
     if (!isEnabled) {
-      requestFanTurnOff(deviceID);
+      requestBluetoothDeviceFanTurnOff(deviceID, openModal);
     }
   }, [isEnabled]);
 
@@ -82,7 +82,12 @@ const ControlDeviceScreen = ({navigation}: Props) => {
 
   useFocusEffect(
     React.useCallback(() => {
-      requestBatteryLevel(deviceID, batteryState, openModal, setBatteryLevel);
+      requestBluetoothDeviceBatteryLevel(
+        deviceID,
+        batteryState,
+        openModal,
+        setBatteryLevel,
+      );
     }, [batteryLevel]),
   );
 

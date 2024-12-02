@@ -1,9 +1,12 @@
 import {characteristic_UUID, notify_UUID, service_UUID} from '../../data/uuids';
 import {BLEService} from '../../services/BLEService';
-import {charToDecimal, decodeFromBase64, encodeToBase64} from '../common';
+import changeFromCharToDecimal from '../common/changeFromCharToDecimal';
+import decodeFromBufferToBase64 from '../common/decodeFromBufferToBase64';
+import encodeFromBufferToBase64 from '../common/encodeFromBufferToBase64';
+import checkBluetoothDeviceConnection from './checkBluetoothDeviceConnection';
 
 // 배터리 측정 요청을 보내는 함수
-const requestBatteryLevel = async (
+const requestBluetoothDeviceBatteryLevel = async (
   deviceID: string,
   battery: string,
   openModal: () => void,
@@ -16,14 +19,9 @@ const requestBatteryLevel = async (
     }
 
     // 연결 상태 확인 및 재연결
-    const isConnected = await BLEService.manager.isDeviceConnected(deviceID);
-    if (!isConnected) {
-      console.log('Device is not connected. Reconnecting...');
-      await BLEService.manager.connectToDevice(deviceID).catch(() => {
-        openModal();
-        return;
-      });
-    }
+    await checkBluetoothDeviceConnection(deviceID).catch(() => {
+      return openModal();
+    });
 
     // 서비스 및 특성 검색
     await BLEService.manager.discoverAllServicesAndCharacteristicsForDevice(
@@ -31,7 +29,7 @@ const requestBatteryLevel = async (
     );
 
     // 배터리 요청 데이터 생성 (기기 문서를 참조해 데이터 형식 확인 필요)
-    const base64Data = encodeToBase64(battery); // 요청 데이터 변경 필요
+    const base64Data = encodeFromBufferToBase64(battery); // 요청 데이터 변경 필요
 
     // 배터리 요청 전송
     await BLEService.manager.writeCharacteristicWithResponseForDevice(
@@ -57,9 +55,9 @@ const requestBatteryLevel = async (
 
         if (characteristic?.value) {
           console.log(characteristic.value);
-          const decodedValue = decodeFromBase64(characteristic.value);
+          const decodedValue = decodeFromBufferToBase64(characteristic.value);
           const targetCharValue = decodedValue[3];
-          const decimalValue = charToDecimal(targetCharValue);
+          const decimalValue = changeFromCharToDecimal(targetCharValue);
           console.log(`Battery Data: ${decimalValue}`);
           setBatteryLevel(decimalValue);
         }
@@ -70,4 +68,4 @@ const requestBatteryLevel = async (
   }
 };
 
-export default requestBatteryLevel;
+export default requestBluetoothDeviceBatteryLevel;

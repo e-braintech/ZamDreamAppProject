@@ -1,11 +1,15 @@
 import aromaStep from '../../data/aromaStep';
 import {characteristic_UUID, service_UUID} from '../../data/uuids';
 import {BLEService} from '../../services/BLEService';
-import {encodeToBase64} from '../common';
+import encodeFromBufferToBase64 from '../common/encodeFromBufferToBase64';
+import checkBluetoothDeviceConnection from './checkBluetoothDeviceConnection';
 
 // 방향 종료 시키는 함수
-const requestFanTurnOff = async (deviceID: string) => {
-  const data = encodeToBase64(aromaStep.turn_off);
+const requestBluetoothDeviceFanTurnOff = async (
+  deviceID: string,
+  openModal: () => void,
+) => {
+  const data = encodeFromBufferToBase64(aromaStep.turn_off);
 
   try {
     if (!deviceID) {
@@ -13,11 +17,10 @@ const requestFanTurnOff = async (deviceID: string) => {
       return;
     }
 
-    const isConnected = await BLEService.manager.isDeviceConnected(deviceID);
-    if (!isConnected) {
-      console.log('Device is not connected. Reconnecting...');
-      await BLEService.manager.connectToDevice(deviceID);
-    }
+    // 연결 상태 확인 및 재연결
+    await checkBluetoothDeviceConnection(deviceID).catch(() => {
+      return openModal();
+    });
 
     await BLEService.manager.writeCharacteristicWithResponseForDevice(
       deviceID,
@@ -32,4 +35,4 @@ const requestFanTurnOff = async (deviceID: string) => {
   }
 };
 
-export default requestFanTurnOff;
+export default requestBluetoothDeviceFanTurnOff;

@@ -2,7 +2,7 @@ import LottieView from 'lottie-react-native';
 import React from 'react';
 import {Modal, Pressable, Text, View} from 'react-native';
 import {NativeStackNavigationProp} from 'react-native-screens/lib/typescript/native-stack/types';
-import reconnnectBluetoothDevice from '../../utils/Bluetooth/reconnectBluetoothDevice';
+import reconnnectBluetoothDevice from '../../utils/bluetooth/reconnectBluetoothDevice';
 
 interface BluetoothDisconnectModalProps {
   visible: boolean;

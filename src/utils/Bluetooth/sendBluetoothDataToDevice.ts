@@ -1,6 +1,7 @@
 import {characteristic_UUID, service_UUID} from '../../data/uuids';
 import {BLEService} from '../../services/BLEService';
-import {encodeToBase64} from '../common';
+import encodeFromBufferToBase64 from '../common/encodeFromBufferToBase64';
+import checkBluetoothDeviceConnection from './checkBluetoothDeviceConnection';
 
 // 기기 높낮이 초기값 전송 함수
 const sendBluetoothDataToDevice = async (
@@ -13,7 +14,7 @@ const sendBluetoothDataToDevice = async (
   console.log(data);
 
   try {
-    const base64Data = encodeToBase64(data);
+    const base64Data = encodeFromBufferToBase64(data);
 
     if (!deviceID) {
       console.log('No connected device found');
@@ -22,14 +23,9 @@ const sendBluetoothDataToDevice = async (
     }
 
     // 연결 상태 확인
-    const isConnected = await BLEService.manager.isDeviceConnected(deviceID);
-    if (!isConnected) {
-      console.log('Device is not connected. Reconnecting...');
-      await BLEService.manager.connectToDevice(deviceID).catch(() => {
-        openModal();
-        return;
-      });
-    }
+    await checkBluetoothDeviceConnection(deviceID).catch(() => {
+      return openModal();
+    });
 
     BLEService.manager
       .writeCharacteristicWithResponseForDevice(

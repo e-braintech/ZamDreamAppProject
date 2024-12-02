@@ -1,7 +1,7 @@
 import {BottomSheetModalMethods} from '@gorhom/bottom-sheet/lib/typescript/types';
 import {Device} from 'react-native-ble-plx';
 import {NativeStackNavigationProp} from 'react-native-screens/lib/typescript/native-stack/types';
-import {connectToDevice} from '../../services';
+import connectBluetoothDevice from './connectBluetoothDevice';
 import startBluetoothDeviceScan from './startBluetoothDeviceScan';
 
 const scanBluetoothDevice = async (
@@ -42,7 +42,7 @@ const scanBluetoothDevice = async (
     } else if (isScanComplete && !connectionStatus) {
       // 스캔 완료 후 연결 시도
       console.log('처음 연결 시도 중...');
-      await connectToDevice(
+      await connectBluetoothDevice(
         devices,
         setConnectionStatus,
         setIsConnecting,

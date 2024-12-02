@@ -9,8 +9,8 @@ import {
 } from 'react-native';
 import {NativeStackNavigationProp} from 'react-native-screens/lib/typescript/native-stack/types';
 import useModal from '../../hooks/useModal';
-import getPillowStepData from '../../utils/Bluetooth/getPillowStepData';
-import sendBluetoothDataToDevice from '../../utils/Bluetooth/sendBluetoothDataToDevice';
+import sendBluetoothDataToDevice from '../../utils/bluetooth/sendBluetoothDataToDevice';
+import getPillowStepData from '../../utils/common/getPillowStepData';
 import {loadStepLevel} from '../../utils/storage/storage';
 import {useStepStore, useSwitchStore} from '../../utils/zustand/store';
 

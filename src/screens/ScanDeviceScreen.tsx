@@ -22,7 +22,7 @@ import useBluetoothState from '../hooks/useBluetoothState';
 import {useBottomSheetBackHandler} from '../hooks/useBottomSheetBackHandler';
 import useModal from '../hooks/useModal';
 import {BLEService} from '../services/BLEService';
-import startBluetoothDeviceScan from '../utils/Bluetooth/startBluetoothDeviceScan';
+import startBluetoothDeviceScan from '../utils/bluetooth/startBluetoothDeviceScan';
 
 type Props = NativeStackScreenProps<ROOT_NAVIGATION, 'ScanDevice'>;
 

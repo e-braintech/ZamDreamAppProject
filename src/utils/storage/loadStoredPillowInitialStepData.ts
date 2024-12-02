@@ -1,6 +1,6 @@
-import {loadStepLevel} from '../storage/storage';
-import getPillowInitialStepData from './getPillowInitialStepData';
-import sendBluetoothDataToDevice from './sendBluetoothDataToDevice';
+import sendBluetoothDataToDevice from '../bluetooth/sendBluetoothDataToDevice';
+import getPillowInitialStepData from '../common/getPillowInitialStepData';
+import {loadStepLevel} from './storage';
 
 // 기기 높낮이 초기값 로드 함수
 const loadStoredPillowInitialStepData = async (
