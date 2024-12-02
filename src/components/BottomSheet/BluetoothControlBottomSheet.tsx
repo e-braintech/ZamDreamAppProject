@@ -112,8 +112,10 @@ const BluetoothControlBottomSheet: React.FC<
       if (data) {
         await sendBluetoothDataToDevice(data, stepLevel, deviceID, openModal)
           .then(() => {
-            const part = getPartName(stepNumber);
-            setStep(part, stepLevel); // 상태 저장
+            if (stepNumber !== 6) {
+              const part = getPartName(stepNumber);
+              setStep(part, stepLevel); // stepNumber가 6이 아닐 때만 상태 저장
+            }
           })
           .catch(err => console.log(err));
         hideBottomSheet();
