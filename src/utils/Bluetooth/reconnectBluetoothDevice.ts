@@ -10,12 +10,12 @@ const reconnnectBluetoothDevice = async (
   await BLEService.manager
     .cancelDeviceConnection(deviceID)
     .then(() => {
-      console.log('Connection reset successfully');
+      console.log('재연결 성공');
       closeModal();
       navigation.navigate('ScanDevice');
     })
     .catch(error => {
-      console.log('Failed to reset connection:', error);
+      console.log('재연결 실패 및 오류: ', error);
       closeModal();
       navigation.navigate('ScanDevice');
     });

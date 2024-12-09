@@ -14,7 +14,7 @@ const requestBluetoothDeviceBatteryLevel = async (
 ) => {
   try {
     if (!deviceID) {
-      console.log('No connected device found');
+      console.log('연결된 기기 x');
       return;
     }
 
@@ -39,8 +39,6 @@ const requestBluetoothDeviceBatteryLevel = async (
       base64Data,
     );
 
-    console.log('Battery level request sent.');
-
     // 배터리 응답 모니터링
     BLEService.manager.monitorCharacteristicForDevice(
       deviceID,
@@ -48,23 +46,22 @@ const requestBluetoothDeviceBatteryLevel = async (
       notify_UUID, // 배터리 Notify 특성 UUID
       (error, characteristic) => {
         if (error) {
-          console.log('Failed to monitor characteristic:', error);
+          console.log('연결 오류: ', error);
           openModal();
           return;
         }
 
         if (characteristic?.value) {
-          console.log(characteristic.value);
           const decodedValue = decodeFromBufferToBase64(characteristic.value);
           const targetCharValue = decodedValue[3];
           const decimalValue = changeFromCharToDecimal(targetCharValue);
-          console.log(`Battery Data: ${decimalValue}`);
+          console.log(`배터리 상태 값: ${decimalValue}`);
           setBatteryLevel(decimalValue);
         }
       },
     );
   } catch (error) {
-    console.log('Failed to request battery level:', error);
+    console.log('연결 오류: ', error);
   }
 };
 

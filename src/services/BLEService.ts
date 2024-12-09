@@ -64,8 +64,6 @@ class BLEServiceInstance {
             break;
           default:
             console.log('Unsupported state: ', state);
-          // resolve()
-          // subscription.remove()
         }
       }, true);
     });

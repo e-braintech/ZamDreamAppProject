@@ -41,7 +41,7 @@ const scanBluetoothDevice = async (
       }, 3000);
     } else if (isScanComplete && !connectionStatus) {
       // 스캔 완료 후 연결 시도
-      console.log('처음 연결 시도 중...');
+      console.log('연결 하는 중...');
       await connectBluetoothDevice(
         devices,
         setConnectionStatus,
@@ -49,10 +49,10 @@ const scanBluetoothDevice = async (
         setConnectedDeviceId,
       );
     } else {
-      console.log('아직 준비가 완료되지 않았습니다.');
+      console.log('스캔 및 연결 시도 전...');
     }
   } else {
-    console.log('스캔 중이거나 연결 중입니다.');
+    console.log('스캔 중이거나 연결 중...');
   }
 };
 

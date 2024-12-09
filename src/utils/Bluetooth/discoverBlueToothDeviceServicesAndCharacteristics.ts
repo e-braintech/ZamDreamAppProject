@@ -10,20 +10,9 @@ const discoverBlueToothDeviceServicesAndCharacteristics = async (
     );
 
     const services = await BLEService.manager.servicesForDevice(deviceID);
-    console.log('Discovered services:', services);
-
-    for (const service of services) {
-      const characteristics = await BLEService.manager.characteristicsForDevice(
-        deviceID,
-        service.uuid,
-      );
-      console.log(
-        `Service ${service.uuid} has characteristics:`,
-        characteristics,
-      );
-    }
+    console.log('발견된 서비스: ', services);
   } catch (error) {
-    console.log('Failed to discover services and characteristics:', error);
+    console.log('services와 characteristics 탐색 오류:', error);
   }
 };
 

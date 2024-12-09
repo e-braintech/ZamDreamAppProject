@@ -25,7 +25,7 @@ const connectBluetoothDevice = async (
     setConnectionStatus('success'); // 연결 성공 상태로 설정
     setConnectedDeviceID(device.id); // 연결된 기기의 ID 저장
   } catch (error) {
-    console.log('연결 중 오류:', error);
+    console.log('연결 오류: ', error);
     setConnectionStatus('fail'); // 연결 실패 상태로 설정
   } finally {
     setIsConnecting(false);

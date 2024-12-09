@@ -115,11 +115,11 @@ const BluetoothControlBottomSheet: React.FC<
               setStep(part, stepLevel); // stepNumber가 6이 아닐 때만 상태 저장
             }
           })
-          .catch(err => console.log(err));
+          .catch(error => console.log('기기 데이터 전송 실패: ', error));
         hideBottomSheet();
       }
     } catch (error) {
-      console.log('데이터 전송 실패: ', error);
+      console.log('연결 오류: ', error);
     }
   };
 

@@ -5,7 +5,7 @@ import discoverBlueToothDeviceServicesAndCharacteristics from './discoverBlueToo
 const checkBluetoothDeviceConnection = async (deviceID: string) => {
   const isConnected = await BLEService.manager.isDeviceConnected(deviceID);
   if (!isConnected) {
-    console.log('Device is not connected. Attempting to reconnect...');
+    console.log('다시 연결 시도 중...');
     await BLEService.manager.connectToDevice(deviceID).then(async () => {
       await discoverBlueToothDeviceServicesAndCharacteristics(deviceID);
     });

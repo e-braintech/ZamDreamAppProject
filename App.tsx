@@ -28,9 +28,9 @@ async function requestPermissions() {
       statuses[PERMISSIONS.IOS.BLUETOOTH] === RESULTS.GRANTED &&
       statuses[PERMISSIONS.IOS.LOCATION_WHEN_IN_USE] === RESULTS.GRANTED
     ) {
-      console.log('iOS BLE 및 위치 권한 허용됨');
+      console.log('iOS 블루투스 및 위치 권한 허용됨');
     } else {
-      console.log('iOS 권한 거부됨');
+      console.log('iOS iOS 블루투스 및 위치 권한 거부됨');
     }
   } else if (Platform.OS === 'android') {
     // Android에서 요청할 권한 목록을 배열에 추가
@@ -49,9 +49,9 @@ async function requestPermissions() {
       statuses[PERMISSIONS.ANDROID.BLUETOOTH_CONNECT] === RESULTS.GRANTED &&
       statuses[PERMISSIONS.ANDROID.ACCESS_FINE_LOCATION] === RESULTS.GRANTED
     ) {
-      console.log('Android BLE 및 위치 권한 허용됨');
+      console.log('Android 블루투스 및 위치 권한 허용됨');
     } else {
-      console.log('Android 권한 거부됨');
+      console.log('Android 블루투스 및 위치 권한 거부됨');
     }
   }
 }

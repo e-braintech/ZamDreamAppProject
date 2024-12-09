@@ -13,7 +13,7 @@ const requestBluetoothDeviceFanTurnOff = async (
 
   try {
     if (!deviceID) {
-      console.log('No connected device found');
+      console.log('연결된 기기 x');
       return;
     }
 
@@ -28,10 +28,8 @@ const requestBluetoothDeviceFanTurnOff = async (
       characteristic_UUID,
       data,
     );
-
-    console.log('Smell turn off value sent to server');
   } catch (error) {
-    console.log('Failed to send smell turn off value:', error);
+    console.log('연결 오류: ', error);
   }
 };
 

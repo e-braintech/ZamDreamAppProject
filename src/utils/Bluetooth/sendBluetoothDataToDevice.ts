@@ -11,13 +11,11 @@ const sendBluetoothDataToDevice = async (
   openModal: () => void,
   part?: string,
 ) => {
-  console.log(data);
-
   try {
     const base64Data = encodeFromBufferToBase64(data);
 
     if (!deviceID) {
-      console.log('No connected device found');
+      console.log('연결된 기기 x');
       openModal();
       return;
     }
@@ -34,14 +32,15 @@ const sendBluetoothDataToDevice = async (
         characteristic_UUID,
         base64Data,
       )
-      .then(res => {
-        console.log(`Data sent successfully for ${part} at level ${stepLevel}`);
+      .then(() => {
+        console.log(`${part} 부위 전송값: ${stepLevel}`);
       })
-      .catch(err => {
+      .catch(error => {
+        console.log('데이터 전송 실패: ', error);
         return;
       });
   } catch (error) {
-    console.log('Failed to send data:', error);
+    console.log('연결 오류: ', error);
   }
 };
 

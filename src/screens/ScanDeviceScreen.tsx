@@ -60,12 +60,12 @@ const ScanDeviceScreen = ({navigation}: Props) => {
 
   useEffect(() => {
     if (bluetoothState === 'off') {
-      console.log('블루투스 상태: off');
+      console.log('블루투스 상태: ', bluetoothState);
     } else if (bluetoothState === 'on') {
-      console.log('블루투스 상태: on');
+      console.log('블루투스 상태: ', bluetoothState);
     }
 
-    console.log('Current app state:', appState);
+    console.log('현재 앱 모드 상태: ', appState);
   }, [bluetoothState, appState]);
 
   return (
