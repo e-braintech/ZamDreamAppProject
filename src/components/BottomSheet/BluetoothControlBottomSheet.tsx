@@ -142,7 +142,7 @@ const BluetoothControlBottomSheet: React.FC<
         setStepLevel(loadStepLevel('leftHead'));
         break;
       case 6:
-        setStepLevel(loadStepLevel('smell'));
+        setStepLevel(loadStepLevel('aroma'));
         break;
       default:
         setStepLevel(1);

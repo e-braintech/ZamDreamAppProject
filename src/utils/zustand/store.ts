@@ -8,7 +8,7 @@ export const useStepStore = create<PillowStepState>(set => ({
   head: loadStepLevel('head'),
   rightHead: loadStepLevel('rightHead'),
   leftHead: loadStepLevel('leftHead'),
-  smell: loadStepLevel('smell') === 1,
+  aroma: loadStepLevel('aroma') === 1,
   setStep: (part, level) => {
     set(state => ({...state, [part]: level}));
     saveStepLevel(part, level); // MMKV에 저장
