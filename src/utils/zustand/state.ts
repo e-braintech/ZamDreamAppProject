@@ -13,3 +13,8 @@ export interface SwitchState {
   toggleSwitch: () => void;
   setEnabled: (enabled: boolean) => void;
 }
+
+export interface AromaStepState {
+  aromaStepLevel: number;
+  setAromaStepLevel: (level: number) => void;
+}

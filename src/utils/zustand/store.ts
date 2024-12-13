@@ -1,6 +1,6 @@
 import {create} from 'zustand';
 import {loadStepLevel, saveStepLevel} from '../storage/storage';
-import {PillowStepState, SwitchState} from './state';
+import {AromaStepState, PillowStepState, SwitchState} from './state';
 
 export const useStepStore = create<PillowStepState>(set => ({
   shoulder: loadStepLevel('shoulder'),
@@ -25,4 +25,9 @@ export const useSwitchStore = create<SwitchState>(set => ({
     set({
       isEnabled: enabled,
     }),
+}));
+
+export const useAromaStore = create<AromaStepState>(set => ({
+  aromaStepLevel: 1,
+  setAromaStepLevel: level => set({aromaStepLevel: level}),
 }));

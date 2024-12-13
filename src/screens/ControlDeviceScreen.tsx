@@ -19,7 +19,7 @@ import ActionStepType from '../types/ActionStepType';
 import requestBluetoothDeviceBatteryLevel from '../utils/bluetooth/requestBluetoothDeviceBatteryLevel';
 import requestBluetoothDeviceFanTurnOff from '../utils/bluetooth/requestBluetoothDeviceFanTurnOff';
 import loadStoredPillowInitialStepData from '../utils/storage/loadStoredPillowInitialStepData';
-import {useSwitchStore} from '../utils/zustand/store';
+import {useAromaStore, useSwitchStore} from '../utils/zustand/store';
 
 type Props = NativeStackScreenProps<ROOT_NAVIGATION, 'ScanDevice'>;
 
@@ -44,7 +44,9 @@ const ControlDeviceScreen = ({navigation}: Props) => {
 
   const snapPoints = useMemo(() => ['20%', '60%'], []);
 
-  const {isEnabled, toggleSwitch, setEnabled} = useSwitchStore();
+  const {isEnabled, toggleSwitch} = useSwitchStore();
+
+  const {setAromaStepLevel} = useAromaStore();
 
   const {isModalVisible, openModal, closeModal} = useModal();
 
@@ -218,7 +220,10 @@ const ControlDeviceScreen = ({navigation}: Props) => {
               </Text>
               <Switch
                 value={isEnabled}
-                onValueChange={toggleSwitch}
+                onValueChange={() => {
+                  toggleSwitch();
+                  setAromaStepLevel(1);
+                }}
                 disabled={!isEnabled}
                 thumbColor={'#ffffff'}
                 trackColor={{true: '#371B9E', false: '#C7C7E8'}}

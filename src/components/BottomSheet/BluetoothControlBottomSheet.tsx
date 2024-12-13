@@ -12,7 +12,11 @@ import useModal from '../../hooks/useModal';
 import sendBluetoothDataToDevice from '../../utils/bluetooth/sendBluetoothDataToDevice';
 import getPillowStepData from '../../utils/common/getPillowStepData';
 import {loadStepLevel} from '../../utils/storage/storage';
-import {useStepStore, useSwitchStore} from '../../utils/zustand/store';
+import {
+  useAromaStore,
+  useStepStore,
+  useSwitchStore,
+} from '../../utils/zustand/store';
 
 interface BluetoothControlBottomSheetProps {
   navigation: NativeStackNavigationProp<ROOT_NAVIGATION, 'ScanDevice'>;
@@ -31,6 +35,8 @@ const BluetoothControlBottomSheet: React.FC<
   const {setStep} = useStepStore();
 
   const {setEnabled} = useSwitchStore();
+
+  const {aromaStepLevel, setAromaStepLevel} = useAromaStore();
 
   const {openModal} = useModal();
 
@@ -104,6 +110,7 @@ const BluetoothControlBottomSheet: React.FC<
 
     if (stepNumber === 6 && stepLevel >= 1 && stepLevel <= 3) {
       setEnabled(true); // 조건이 맞으면 `isEnabled`를 true로 변경
+      setAromaStepLevel(stepLevel);
     }
 
     try {
@@ -142,7 +149,7 @@ const BluetoothControlBottomSheet: React.FC<
         setStepLevel(loadStepLevel('leftHead'));
         break;
       case 6:
-        setStepLevel(loadStepLevel('aroma'));
+        setStepLevel(aromaStepLevel);
         break;
       default:
         setStepLevel(1);
