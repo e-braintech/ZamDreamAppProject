@@ -5,7 +5,14 @@ import {
 } from '@gorhom/bottom-sheet';
 import {RouteProp, useFocusEffect, useRoute} from '@react-navigation/native';
 import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
-import {Image, SafeAreaView, Switch, Text, View} from 'react-native';
+import {
+  BackHandler,
+  Image,
+  SafeAreaView,
+  Switch,
+  Text,
+  View,
+} from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import {NativeStackScreenProps} from 'react-native-screens/lib/typescript/native-stack/types';
 import BluetoothControlBottomSheet from '../components/BottomSheet/BluetoothControlBottomSheet';
@@ -80,6 +87,21 @@ const ControlDeviceScreen = ({navigation}: Props) => {
 
   useEffect(() => {
     loadStoredPillowInitialStepData(deviceID, openModal);
+  }, []);
+
+  useEffect(() => {
+    const handleBackPress = () => {
+      BackHandler.exitApp(); // 앱 종료
+      return true; // 기본 뒤로 가기 동작 차단
+    };
+
+    // BackHandler 이벤트 리스너 추가
+    BackHandler.addEventListener('hardwareBackPress', handleBackPress);
+
+    // 컴포넌트 언마운트 시 이벤트 리스너 제거
+    return () => {
+      BackHandler.removeEventListener('hardwareBackPress', handleBackPress);
+    };
   }, []);
 
   useFocusEffect(
