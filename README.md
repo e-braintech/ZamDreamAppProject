@@ -21,21 +21,13 @@
 | <div align="center">시작 화면</div>                    | <img src="https://github.com/user-attachments/assets/4482594f-bc6a-4010-91cc-099f312e045d" alt="Screenshot_20241227_152441" width="200"> | <img src="https://github.com/user-attachments/assets/950e9061-8f52-49ea-9d85-8e70c82b48a9" alt="60181BF3-54DB-4310-A194-45AA0AE15483" width="200"> |
 | <div align="center">디바이스 스캔 화면</div>           | <img src="https://github.com/user-attachments/assets/f463c5e1-2c38-413f-83c6-a26bd85823e3" alt="Screenshot_20241227_152451" width="200"> | <img src="https://github.com/user-attachments/assets/d4332484-e184-438f-b0d3-be57a1ab3d99" alt="B4D7CD19-7C8D-4687-AA9E-B044374287AA" width="200"> |
 | <div align="center">디바이스 스캔 완료 화면</div>      | <img src="https://github.com/user-attachments/assets/3ad8937d-dc3f-49a8-9ee2-0729c6c822a7" alt="Screenshot_20241227_152459" width="200"> | <img src="https://github.com/user-attachments/assets/74d560f7-ab23-4a6a-87e4-8dd1d53aa0ff" alt="A7B1CE73-133D-40E6-84C8-1D27B3486157" width="200"> |
-|                                                        |
 | <div align="center">디바이스 연결 성공 화면</div>      | <img src="https://github.com/user-attachments/assets/2ab8600a-0487-422c-85c3-a48f0d9cc8aa" alt="Screenshot_20241227_152516" width="200"> | <img src="https://github.com/user-attachments/assets/05f08c71-da1e-4331-8e56-4821a2924576" alt="BFD68A95-F3FE-437E-AF61-D04217A6C251" width="200"> |
-|                                                        |
 | <div align="center">디바이스 연결 실패 화면</div>      | <img src="https://github.com/user-attachments/assets/6c9d5d9d-1c25-4804-a01b-3ffcdc88a9b8" alt="Screenshot_20241227_152504" width="200"> | <img src="https://github.com/user-attachments/assets/3451561a-1a52-4276-9b82-7d97ffbb1140" alt="957BBDF7-6486-4766-8530-1521AAEBBA9F" width="200"> |
-|                                                        |
 | <div align="center">디바이스 컨트롤 메인 화면</div>    | <img src="https://github.com/user-attachments/assets/ca74f451-8f56-4a9c-b976-6dfdd39e268d" alt="Screenshot_20241227_152524" width="200"> | <img src="https://github.com/user-attachments/assets/f88c74a2-3592-41b1-967a-f8685c13b95b" alt="9F1E7724-FDDF-4326-AC1F-FF384FC75CB4" width="200"> |
-|                                                        |
 | <div align="center">디바이스 높낮이 컨트롤 화면</div>  | <img src="https://github.com/user-attachments/assets/de829926-8302-49c0-931e-38cb8de98c71" alt="Screenshot_20241227_152527" width="200"> | <img src="https://github.com/user-attachments/assets/2617108a-17ba-4d7e-ae8e-5b5174d9bd94" alt="D83D0D07-8AA8-49C6-A156-C3C09727588B" width="200"> |
-|                                                        |
 | <div align="center">디바이스 방향 팬 컨트롤 화면</div> | <img src="https://github.com/user-attachments/assets/5ee1726c-8cea-4de7-b898-efc058f9ca79" alt="Screenshot_20241227_152531" width="200"> | <img src="https://github.com/user-attachments/assets/f43d9e52-f85a-41cc-af74-39df5d31a492" alt="56EDBC2B-1675-4623-82BF-0E249B06AC6C" width="200"> |
-|                                                        |
 | <div align="center">디바이스 방향 팬 (on) 화면</div>   | <img src="https://github.com/user-attachments/assets/082760d6-e00a-418c-9023-023e8aae2a25" alt="Screenshot_20241227_152546" width="200"> | <img src="https://github.com/user-attachments/assets/6d88b834-4cd5-4291-af71-a78c7135d260" alt="9517FDEF-85BC-484D-8A8B-62EFE211BCB0" width="200"> |
-|                                                        |
 | <div align="center">디바이스 연결 끊김 화면</div>      | <img src="https://github.com/user-attachments/assets/302e2563-1e3c-4e97-a7c6-33b145a227fb" alt="Screenshot_20241227_152604" width="200"> | <img src="https://github.com/user-attachments/assets/05dabca5-0c94-4e6f-a57f-83defa355b32" alt="CE077D88-0E75-4D55-B453-DB6A714E748F" width="200"> |
-|                                                        |
 
 # 프로젝트 기술
 
