@@ -12,6 +12,20 @@
 ![프로젝트 조직도](https://github.com/user-attachments/assets/fc9c1ae0-6296-40e8-81f7-140426fc3be8)
 
 # 데모 및 스크린샷
+| 화면 이름               | Android                                                                 | iOS                                                                     |
+|-------------------------|------------------------------------------------------------------------|-------------------------------------------------------------------------|
+| 시작 화면              | <img src="https://github.com/user-attachments/assets/b90a4438-6871-41be-90f7-d1dea541c5af" width="150"> | <img src="https://github.com/user-attachments/assets/dd6ee135-edf1-4314-8a28-ec773686a1d2" width="150"> |
+| 디바이스 스캔 화면      | <img src="https://github.com/user-attachments/assets/89240816-fce1-486d-afa9-890f26b3bab9" width="150"> | <img src="https://github.com/user-attachments/assets/1613d41e-a8b5-49c3-b266-43461351f869" width="150"> |
+| 디바이스 스캔 완료 화면 | <img src="https://github.com/user-attachments/assets/4dd3615e-3229-463c-b720-074724447756" width="150"> | <img src="https://github.com/user-attachments/assets/bab55b42-acc1-43bd-b770-45fcce66a0b5" width="150"> |
+| 디바이스 스캔 성공 화면 | <img src="https://github.com/user-attachments/assets/da0fce6e-c452-478e-9f4a-be36f15deaee" width="150"> | <img src="https://github.com/user-attachments/assets/f6e58e67-35aa-4fd5-93b3-dac66a893db1" width="150"> |
+| 디바이스 스캔 실패 화면 | <img src="https://github.com/user-attachments/assets/0d7262b8-7493-4373-a514-04d8f85ce188" width="150"> | <img src="https://github.com/user-attachments/assets/783e3ee4-8ceb-448a-9ef8-7911e14d6cb6" width="150"> |
+| 디바이스 컨트롤 메인 화면 | <img src="https://github.com/user-attachments/assets/2cc0bbfd-1764-40f8-bf77-830be569fbc2" width="150"> | <img src="https://github.com/user-attachments/assets/e60345ac-b097-4b5f-8321-e7293f835b82" width="150"> |
+| 디바이스 베개 높낮이 컨트롤 화면 | <img src="https://github.com/user-attachments/assets/f0928d17-8028-4c5f-a1e9-179b194b6804" width="150"> | <img src="https://github.com/user-attachments/assets/133adcf3-8292-418d-a7bb-af9f7e6cb248" width="150"> |
+| 디바이스 방향 팬 컨트롤 화면 | <img src="https://github.com/user-attachments/assets/4b7c80a4-47cd-4be7-8ddb-0b624826ed0b" width="150"> | <img src="https://github.com/user-attachments/assets/05a9c7d0-1929-4937-984a-52b90af40d74" width="150"> |
+| 디바이스 방향 팬 (on) 화면 | <img src="https://github.com/user-attachments/assets/9a526d8a-8605-4269-a86c-70cdb89343a2" width="150"> | <img src="https://github.com/user-attachments/assets/7fda1af6-abb0-46d6-a603-5a9a6fac2935" width="150"> |
+| 디바이스 연결 끊김 화면 | <img src="https://github.com/user-attachments/assets/9d749df8-f97f-4803-bab5-f2a8273b7e21" width="150"> | <img src="https://github.com/user-attachments/assets/8207b320-a702-44d2-9ccf-855b425706b7" width="150"> |
+
+
 
 # 프로젝트 기술
 - React Native CLI
