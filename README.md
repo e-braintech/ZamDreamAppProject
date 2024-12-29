@@ -51,23 +51,103 @@
 
   # 문제 해결 과정
 
-  **1. 디바이스 데이터 전송 문제**
+**1. 디바이스 데이터 전송 문제**
 
 - 이슈: Buffer 값을 Base64로 인코딩하여 전송해야 했으나, 정해진 프로토콜에서 동작하지 않는 값들이 존재.
 - 해결: H/W 개발자와 협력하여, 알파벳 조합으로 이루어진 프로토콜 값만 Base64로 인코딩하여 전송하도록 프로토콜을 수정하고 조율.
+  <details>
+  <summary>Code</summary>
+  <div markdown="1">
+
+  ```ts
+  // 문자열을 Base64로 인코딩하는 함수
+  const encodeFromBufferToBase64 = (data: string): string => {
+    return Buffer.from(data).toString('base64');
+  };
+
+  export default encodeFromBufferToBase64;
+  ```
+
+  </div>
+  </details>
 
 **2. 배터리 상태 값 불일치**
 
 - 이슈: 디바이스에서 받아오는 배터리 상태 값이 실제 배터리 상태와 다르게 매번 변동.
 - 해결: 배터리 상태를 3단계 구간으로 정리하여 전송하도록 조율.
+
   - 0 ~ 30%: `30%`
   - 31 ~ 50%: `50%`
   - 51 ~ 100%: `100%`
+  <details>
+  <summary>Code</summary>
+  <div markdown="1">
+
+  ```tsx
+  const [batteryLevel, setBatteryLevel] = useState<number | null>(null); // 배터리 레벨을 저장하는 상태
+
+  const batteryImage =
+    batteryLevel === 100
+      ? require('../assets/images/battery100.png')
+      : batteryLevel === 50
+      ? require('../assets/images/battery50.png')
+      : require('../assets/images/battery30.png');
+
+  {
+    batteryLevel && (
+      <View
+        style={{
+          flexDirection: 'row',
+          justifyContent: 'center',
+          alignItems: 'center',
+          marginTop: 8,
+        }}>
+        <Image
+          source={batteryImage}
+          style={{
+            width: 24,
+            height: 12,
+            marginRight: 10,
+          }}
+          resizeMode="contain"
+        />
+        <Text
+          style={{
+            fontSize: 16,
+            fontWeight: 'regular',
+            color: '#ffffff',
+          }}>
+          {batteryLevel}%
+        </Text>
+      </View>
+    );
+  }
+  ```
 
 **3. H/W와 S/W 호환성 문제**
 
 - 이슈: 앱에서 기기로 데이터를 전송한 후 H/W에서 예외적 상황(연결 끊김 등) 발생.
   - 예: 앱에서 현재 1단계인 상태에서 5단계 값을 기기로 전송했으나, H/W가 동작 도중 연결이 끊기는 문제 발생.
 - 해결:
+
   1. 데이터를 전송하기 전에 디바이스 연결 상태를 체크하고, 연결이 끊겼을 경우 재연결 시도.
   2. 앱이 실행 중인 동안 연결 상태를 지속적으로 확인하며, 연결이 끊기면 즉시 재연결 시도.
+    <details>
+  <summary>Code</summary>
+  <div markdown="1">
+
+  ```ts
+  // 기기의 연결 상태를 확인하고, 연결이 끊어진 경우 재연결을 시도하는 함수
+  const checkBluetoothDeviceConnection = async (deviceID: string) => {
+    const isConnected = await BLEService.manager.isDeviceConnected(deviceID);
+    if (!isConnected) {
+      await BLEService.manager.connectToDevice(deviceID).then(async () => {
+        await discoverBlueToothDeviceServicesAndCharacteristics(deviceID);
+      });
+    }
+  };
+  export default checkBluetoothDeviceConnection;
+  ```
+
+</div>
+</details>
