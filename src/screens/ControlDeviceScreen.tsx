@@ -9,6 +9,7 @@ import {
   BackHandler,
   Image,
   SafeAreaView,
+  StatusBar,
   Switch,
   Text,
   View,
@@ -124,6 +125,7 @@ const ControlDeviceScreen = ({navigation}: Props) => {
           flex: 1,
         }}>
         <SafeAreaView style={{flex: 1}}>
+          <StatusBar backgroundColor="#5c35d1" />
           <View style={{flex: 1, paddingHorizontal: 32}}>
             <Text
               style={{

@@ -10,6 +10,7 @@ import {
   Platform,
   Pressable,
   SafeAreaView,
+  StatusBar,
   Text,
   View,
 } from 'react-native';
@@ -70,6 +71,7 @@ const ScanDeviceScreen = ({navigation}: Props) => {
 
   return (
     <BottomSheetModalProvider>
+      <StatusBar backgroundColor="#371b9e" />
       <ImageBackground
         source={source}
         style={{
